@@ -1,8 +1,8 @@
 CREATE TABLE livro (
-    id SERIAL,
-    titulo VARCHAR(100),
-    autor VARCHAR(100),
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(100) NOT NULL,
+    autor VARCHAR(100) NOT NULL,
     preco DECIMAL(8, 2),
-    estoque INTEGER,
-    PRIMARY KEY (id)
+    estoque INTEGER DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE
 )
