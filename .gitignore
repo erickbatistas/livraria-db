@@ -1,0 +1,20 @@
+# Ambientes Virtuais (Essencial ignorar!)
+.venv/
+venv/
+env/
+
+# Cache do Python e do UV
+__pycache__/
+*.py[cod]
+.uv/
+
+# Configurações de editores 
+.vscode/
+.idea/
+
+# Arquivos de banco de dados locais
+*.db
+
+# Arquivos de log e temporários
+*.log
+.DS_Store
