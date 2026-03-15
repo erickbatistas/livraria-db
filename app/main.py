@@ -2,13 +2,14 @@ import gerenciador as ger
 import modelo as m
 
 def menu():
-    opcao = input(print("\nOpções:\n"
+    print("\nOpções:\n"
         "1 - Inserir livros\n"
         "2 - Listar todos livros\n"
         "3 - Gerar relatório de livros\n"
         "4 - Sair\n"
-        "Terminal: "))
-    return opcao
+        "Terminal: ")
+    opcao = input()
+    return opcao 
 
 def main():
     dao = ger.LivroDAO()
