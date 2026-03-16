@@ -4,8 +4,6 @@ from psycopg2 import OperationalError
 import os
 from dotenv import load_dotenv
 
-# Carrega as variáveis do arquivo .env para o sistema para nao expor senhas
-
 load_dotenv()
 
 def conectar():
@@ -22,5 +20,3 @@ def conectar():
     except OperationalError as e:
         print(f"Erro ao conectar ao PostgreSQL: {e}")
         return None
-    
-        

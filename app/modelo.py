@@ -1,8 +1,22 @@
-
 from enum import Enum
 
+
+class Cliente:
+    def __init__(self, nome, id=None, email=None, ativo=True):
+        self.id = id
+        self.nome = nome
+        self.email = email
+        self.ativo = ativo
+
+
+class EstadoPedido(str, Enum):
+    EM_ANDAMENTO = "EM_ANDAMENTO"
+    PRONTO = "PRONTO"
+    ENTREGUE = "ENTREGUE"
+
+
 class Livro:
-    def __init__(self, id, titulo, autor, preco, estoque, ativo):
+    def __init__(self, titulo, autor, preco, estoque, id=None, ativo=True):
         self.id = id
         self.titulo = titulo
         self.autor = autor
@@ -10,30 +24,19 @@ class Livro:
         self.estoque = estoque
         self.ativo = ativo
 
-class Cliente:
-    def __init__(self, id, nome, numero, ativo):
-        self.id = id
-        self.nome = nome
-        self.numero = numero
-        self.ativo = ativo
 
-class pedido:
-    def __init__(self, id, cliente_id, data,Estado, valor, livro_id):
+class Pedido:
+    def __init__(self, cliente_id, id=None, data=None, estado="EM_ANDAMENTO", valor=0.0, pago=False):
         self.id = id
         self.cliente_id = cliente_id
         self.data = data
-        self.Estado = Estado
-        self.livro_id = livro_id
+        self.estado = estado
         self.valor = valor
-        self.pago = False
-    
-class EstadoPedido(str, Enum):
-    EM_ANDAMENTO = "EM_ANDAMENTO"
-    PRONTO = "PRONTO"
-    ENTREGUE = "ENTREGUE"
+        self.pago = pago
+
 
 class PedidoItem:
-    def __init__(self, id, pedido_id, livro_id, quantidade):
+    def __init__(self, pedido_id, livro_id, quantidade, id=None):
         self.id = id
         self.pedido_id = pedido_id
         self.livro_id = livro_id

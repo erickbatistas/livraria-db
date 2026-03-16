@@ -6,22 +6,22 @@ A aplicação é um sistema de vendas de uma livraria.
 ## Configurações iniciais
 
 A aplicação utiliza psql, uv e Docker.
+Crie uma imagem no Docker com postgres:
+
+```bash
+sudo docker run --name <nome-do-container> -e POSTGRES_PASSWORD=<sua-senha> -p 5432:5432 -d postgres
+```
+
 Crie um Database no Postgres através do Docker:
 
 ```bash
-sudo docker exec -it meu-postgres psql -U postgres
-
-# Executar comando no docker
-postgres#= CREATE DATABASE livraria-db
-
-# Sair
-postgres#= \q
+sudo docker exec -it <nome-do-container> psql -U postgres -c "CREATE DATABASE <nome-do-database>;"
 ```
 
 Inicialize o banco de dados com o schema.sql através do Docker e instale as dependências com o uv:
 
 ```bash
-sudo docker exec -i meu-postgres psql -U postgres -d livraria_testes < app/sql/schema.sql
+sudo docker exec -i <nome-do-container> psql -U postgres -d <nome-do-database> < app/sql/schema.sql
 
 uv sync
 ```
@@ -41,44 +41,26 @@ classDiagram
     class Cliente {
         +int id
         +str nome
-        +str numero
+        +str email
         +bool ativo
         +inserir()
         +alterar()
         +remover()
-        +buscar_por_nome(nome) List
-        +listar_todos() List
-        +exibir(id)
+        +listar_todos()
+        +buscar_id(id)
+        +buscar_nome(nome)
         +gerar_relatorio()
     }
 
-    class Pedido {
-        +int id
-        +int cliente_id
-        +date data
-        +EstadoPedido estado
-        +float valor
-        +bool pago
-        +inserir()
-        +alterar()
-        +remover()
-        +buscar(id)
-        +listar_todos() List
-        +listar_por_cliente(cliente_id) List
-        +exibir(id)
-        +gerar_relatorio()
-        +atualizar_estado(estado)
-        +marcar_pago()
+    class Database {
+        +conectar()
     }
 
-    class PedidoItem {
-        +int id
-        +int pedido_id
-        +int item_id
-        +int quantidade
-        +inserir()
-        +remover()
-        +listar_por_pedido(pedido_id) List
+    class EstadoPedido {
+        <<enumeration>>
+        EM_ANDAMENTO
+        PRONTO
+        ENTREGUE
     }
 
     class Livro {
@@ -91,25 +73,41 @@ classDiagram
         +inserir()
         +alterar()
         +remover()
-        +listar_todos() List
-        +exibir(id)
+        +listar_todos()
+        +buscar_id(id)
         +gerar_relatorio()
         +atualizar_quantidade(delta)
     }
 
-    class EstadoPedido {
-        <<enumeration>>
-        EM_ANDAMENTO
-        PRONTO
-        ENTREGUE
+    class Pedido {
+        +int id
+        +int cliente_id
+        +date data
+        +EstadoPedido estado
+        +float valor
+        +bool pago
+        +inserir()
+        +alterar()
+        +remover()
+        +listar_todos()
+        +listar_cliente(cliente_id)  
+        +buscar_id(id)
+        +pagar()
+        +atualizar_estado(estado)
+        +gerar_relatorio()
     }
 
-    class Database {
-        +conectar()
-        +fechar()
+    class PedidoItem {
+        +int id
+        +int pedido_id
+        +int livro_id
+        +int quantidade
+        +inserir()
+        +remover()
+        +listar_pedido(pedido_id)
     }
 
-    Cliente "1" --> "1..*" Pedido : realiza
+    Cliente "1" --> "0..*" Pedido : realiza
     Pedido "1" --> "1..*" PedidoItem : contém
     PedidoItem "0..*" --> "1" Livro : referencia
     Pedido --> "1" EstadoPedido : estado
