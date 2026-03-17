@@ -185,7 +185,7 @@ def main():
                     dao.pagar(input("ID do pedido que deseja pagar: "))
 
                 elif tarefa == "7":
-                    # FIX: restrições para enviar o pedido apenas quando for pago
+                
                     pedido_id = input("ID do pedido: ")
                     estado_novo = input("Atualizar para qual estado?\n"
                     "1 - Em andamento\n"
@@ -198,7 +198,16 @@ def main():
                         estado_novo = "PRONTO"
                     elif estado_novo == "3":
                         estado_novo = "ENTREGUE"
-                    
+                    pedido = dao.buscar_id(pedido_id)
+                    if pedido is None:
+                        print("\nID do pedido inválido!\n")
+                        continue
+
+                    # Só permite mudar para PRONTO/ENTREGUE se o pedido já estiver pago
+                    if estado_novo in ("PRONTO", "ENTREGUE") and not pedido[5]:
+                        print("\nOperação não permitida: o pedido precisa ser pago antes de enviar/entregar.\n")
+                        continue
+
                     dao.atualizar_estado(pedido_id, estado_novo)
 
                 elif tarefa == "8":
@@ -229,16 +238,41 @@ def carrinho(pedido_id):
                 print("\nLivro inserindo no carrinho com sucesso!")
 
         elif tarefa == "2":
-            # FIX: verificar ID
-            dao.remover(input("Digite o ID do livro que deseja remover do carrinho: "))
+           
+            livro_id_str = input("Digite o ID do livro que deseja remover do carrinho: ")
+            try:
+                livro_id = int(livro_id_str)
+            except:
+                print("\nID inválido!\n")
+                continue
+
+            itens = dao.listar_pedido(pedido_id)
+            existe = False
+            for item in itens:
+                # item[2] é o livro_id retornado por listar_pedido
+                if item[2] == livro_id:
+                    existe = True
+                    break
+
+            if not existe:
+                print("\nID do livro não encontrado no pedido!\n")
+                continue
+
+            dao.remover(livro_id)
             print("\nLivro removido do carrinho com sucesso!\n")
 
         elif tarefa == "3":
-            # FIX: mostrar valor total do pedido
             resultado = dao.listar_pedido(pedido_id)
             print("ID   Pedido_ID   Livro_ID    Titulo  Autor   Preço   Quantidade")
             for i in range(len(resultado)):
                 print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}   {resultado[i][5]}   {resultado[i][6]}")
+            # Mostrar valor total do pedido a partir da tabela pedido
+            pedidoDao = PedidoDAO()
+            pedido = pedidoDao.buscar_id(pedido_id)
+            if pedido is not None:
+                print(f"\nValor total do pedido: R$ {pedido[4]}")
+            else:
+                print("\nNão foi possível obter o valor total do pedido.")
 
         elif tarefa == "4":
             dao = LivroDAO()

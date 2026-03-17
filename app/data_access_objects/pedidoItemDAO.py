@@ -7,16 +7,20 @@ class PedidoItemDAO(BaseDAO):
         cursor = con.cursor()
         cursor.execute("SELECT estoque, preco FROM livro WHERE id=%s", (pedido_item.livro_id,))
         valores_livro = cursor.fetchone()
-        if valores_livro[0] < pedido_item.quantidade:
-            print("\nEstoque insuficiente.")
+        if valores_livro is None:
+            print("\nLivro não encontrado.")
             sucesso = False
         else:
-            cursor.execute("INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES (%s, %s, %s)", 
-                        (pedido_item.pedido_id, pedido_item.livro_id, pedido_item.quantidade))
-            cursor.execute("UPDATE livro SET estoque=estoque-%s WHERE id=%s", (pedido_item.quantidade, pedido_item.livro_id))
-            cursor.execute("UPDATE pedido SET valor=valor+%s WHERE id=%s", (pedido_item.quantidade*valores_livro[1], pedido_item.pedido_id,))
-            con.commit()
-            sucesso = True
+            if valores_livro[0] < pedido_item.quantidade:
+                print("\nEstoque insuficiente.")
+                sucesso = False
+            else:
+                cursor.execute("INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES (%s, %s, %s)", 
+                            (pedido_item.pedido_id, pedido_item.livro_id, pedido_item.quantidade))
+                cursor.execute("UPDATE livro SET estoque=estoque-%s WHERE id=%s", (pedido_item.quantidade, pedido_item.livro_id))
+                cursor.execute("UPDATE pedido SET valor=valor+%s WHERE id=%s", (pedido_item.quantidade*valores_livro[1], pedido_item.pedido_id,))
+                con.commit()
+                sucesso = True
         cursor.close()
         con.close()
         return sucesso
