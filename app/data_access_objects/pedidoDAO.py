@@ -5,17 +5,8 @@ class PedidoDAO(BaseDAO):
     def inserir(self, pedido):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("INSERT INTO pedido (cliente_id, data, estado, valor, livro_id) VALUES (%s, %s, %s, %s, %s)", 
-                       (pedido.cliente_id, pedido.data, pedido.Estado, pedido.valor, pedido.livro_id))
-        con.commit()
-        cursor.close()
-        con.close()
-
-    def alterar(self, pedido):
-        con = self.conectar()
-        cursor = con.cursor()
-        cursor.execute("UPDATE pedido SET cliente_id=%s, data=%s, estado=%s, valor=%s, livro_id=%s WHERE id=%s", 
-                       (pedido.cliente_id, pedido.data, pedido.Estado, pedido.valor, pedido.livro_id, pedido.id))
+        cursor.execute("INSERT INTO pedido (cliente_id, estado, valor, pago) VALUES (%s, %s, %s, %s)", 
+                       (pedido.cliente_id, pedido.estado, pedido.valor, pedido.pago))
         con.commit()
         cursor.close()
         con.close()
@@ -26,7 +17,7 @@ class PedidoDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data, estado, valor, livro_id FROM pedido")
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -35,7 +26,7 @@ class PedidoDAO(BaseDAO):
     def listar_cliente(self, cliente_id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data, estado, valor, livro_id FROM pedido WHERE cliente_id=%s", (cliente_id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s", (cliente_id,))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -44,7 +35,7 @@ class PedidoDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data, estado, valor, livro_id FROM pedido WHERE id=%s", (id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s", (id,))
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -75,3 +66,11 @@ class PedidoDAO(BaseDAO):
         con.close()
         return resultado
     
+    def id_ultimo_pedido(self):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id FROM pedido ORDER BY id DESC LIMIT 1")
+        resultado = cursor.fetchone()
+        cursor.close()
+        con.close()
+        return resultado

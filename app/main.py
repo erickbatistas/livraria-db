@@ -35,7 +35,7 @@ def main():
                     novo_email = ler_str_default("Novo Email: ")
                     novo_ativo = input("Ativo? (s/N): ").lower() == 's'
 
-                    #Cria o objeto Cliente com os novos dados
+                    # Cria o objeto Cliente com os novos dados
                     cliente_atualizado = m.Cliente(
                         id=id_alterar, 
                         nome=novo_nome,
@@ -102,7 +102,7 @@ def main():
                     novo_estoque = ler_int("Novo Estoque: ")
                     novo_ativo = input("Ativo? (s/N): ").lower() == 's'
 
-                    #Cria o objeto Livro com os novos dados
+                    # Cria o objeto Livro com os novos dados
                     livro_atualizado = m.Livro(
                         id=id_alterar, 
                         titulo=novo_titulo, 
@@ -142,28 +142,38 @@ def main():
                 tarefa = menuPedidos()
 
                 if tarefa == "1":
+                    dao = ClienteDAO() # Hack
                     print("\n-- Fazer pedido --")
-                    cliente_id = ler_float("ID do Cliente: ")
+                    cliente_id = ler_int("ID do Cliente: ")
                     if dao.buscar_id(cliente_id) is None:
                         print("\nID inválido!\n")
                         continue
                     
+                    dao = PedidoDAO() # Hack
                     novo_pedido = m.Pedido(id=None, cliente_id=cliente_id, data=None, estado="EM_ANDAMENTO", valor=0.0, pago=False)
                     dao.inserir(novo_pedido)
                     print("\nPedido aberto com sucesso!")
+                    pedido_id = dao.id_ultimo_pedido()
+                    
+                    carrinho(pedido_id)
 
                 elif tarefa == "2":
-                    pass
+                    id_alterar = input("Digite o ID do pedido que deseja alterar: ")
+                    if dao.buscar_id(id_alterar) is None:
+                        print("\nID inválido!\n")
+                        continue
+
+                    carrinho(id_alterar)
 
                 elif tarefa == "3":
                     resultado = dao.listar_todos()
-                    print("Id   Cliente_Id   Data       Estado      Valor   Livro_Id")
+                    print("Id   Cliente_Id   Data       Estado      Valor   Pago")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
 
                 elif tarefa == "4":
                     resultado = dao.listar_cliente(input("ID do Cliente: "))
-                    print("Id   Cliente_Id   Data       Estado      Valor   Livro_Id")
+                    print("Id   Cliente_Id   Data       Estado      Valor   Pago")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
 
@@ -172,9 +182,11 @@ def main():
                     print(resultado)
 
                 elif tarefa == "6":
+                    # FIX: atualizar o estoque de livros quando for pago
                     dao.pagar(input("ID do pedido que deseja pagar: "))
 
                 elif tarefa == "7":
+                    # FIX: restrições para enviar o pedido apenas quando for pago
                     pedido_id = input("ID do pedido: ")
                     estado_novo = input("Atualizar para qual estado?\n"
                     "1 - Em andamento\n"
@@ -199,6 +211,41 @@ def main():
                     break
 
         elif opcao == "0":
+            break
+
+
+def carrinho(pedido_id):
+    while True:
+        dao = PedidoItemDAO()
+        tarefa = menuPedidoItem()
+
+        if tarefa == "1":
+            print("\n-- Inserir livro no carrinho --")
+            livro_id = ler_int("ID do livro: ")
+            quantidade = ler_int("Quantidade de livros: ")
+            
+            novo_item = m.PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
+            dao.inserir(novo_item)
+            print("\nLivro inserindo no carrinho com sucesso!")
+
+        elif tarefa == "2":
+            dao.remover(input("Digite o ID do livro que deseja remover do carrinho: "))
+            print("\nLivro removido do carrinho com sucesso!\n")
+
+        elif tarefa == "3":
+            resultado = dao.listar_pedido(pedido_id)
+            print("Id   Pedido_Id   Livro_Id   Quantidade")
+            for i in range(len(resultado)):
+                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}")
+
+        elif tarefa == "4":
+            dao = LivroDAO()
+            resultado = dao.listar_todos()
+            print("Id   Título      Autor       Preço   Estoque")
+            for i in range(len(resultado)):
+                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}")
+
+        elif tarefa == "0":
             break
 
 
@@ -251,6 +298,17 @@ def menuPedidos():
         "0 - Voltar\n"
         "Terminal: ")
     return opcao 
+
+
+def menuPedidoItem():
+    opcao = input("\nOpções:\n"
+        "1 - Inserir item\n"
+        "2 - Remover item\n"
+        "3 - Listar pedido\n"
+        "4 - Listar livros\n"
+        "0 - Voltar\n"
+        "Terminal: ")
+    return opcao
 
 
 def ler_float(mensagem):

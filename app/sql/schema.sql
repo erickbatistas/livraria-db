@@ -6,7 +6,7 @@ CREATE TABLE cliente (
 );
 
 
-CREATE TYPE estado_pedido AS ENUM ('EM_ANDAMENTO', 'PRONTO', 'ENTREGUE');
+CREATE TYPE estado_pedido AS ENUM ('EM_ANDAMENTO', 'PRONTO', 'ENTREGUE'); -- FIX: Alterar para "ESPERANDO_PAGAMENTO", "ENVIADO", "ENTREGUE"?
 
 
 CREATE TABLE livro (

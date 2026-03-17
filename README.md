@@ -87,7 +87,6 @@ classDiagram
         +float valor
         +bool pago
         +inserir()
-        +alterar()
         +remover()
         +listar_todos()
         +listar_cliente(cliente_id)  
@@ -95,6 +94,7 @@ classDiagram
         +pagar()
         +atualizar_estado(estado)
         +gerar_relatorio()
+        +id_ultimo_pedido()
     }
 
     class PedidoItem {
