@@ -51,7 +51,7 @@ def main():
 
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    print("Id   Nome       Email")
+                    print("ID   Nome       Email")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}")
 
@@ -62,7 +62,7 @@ def main():
                 elif tarefa == "6":
                     nome = ler_str_default("Nome: ")
                     resultado = dao.buscar_nome(nome)
-                    print("Id   Nome       Email")
+                    print("ID   Nome       Email")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}")
 
@@ -120,7 +120,7 @@ def main():
                     
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    print("Id   Título      Autor       Preço   Estoque")
+                    print("ID   Título      Autor       Preço   Estoque")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}")
                 
@@ -167,13 +167,13 @@ def main():
 
                 elif tarefa == "3":
                     resultado = dao.listar_todos()
-                    print("Id   Cliente_Id   Data       Estado      Valor   Pago")
+                    print("ID   Cliente_ID   Data       Estado      Valor   Pago")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
 
                 elif tarefa == "4":
                     resultado = dao.listar_cliente(input("ID do Cliente: "))
-                    print("Id   Cliente_Id   Data       Estado      Valor   Pago")
+                    print("ID   Cliente_ID   Data       Estado      Valor   Pago")
                     for i in range(len(resultado)):
                         print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
 
@@ -182,7 +182,6 @@ def main():
                     print(resultado)
 
                 elif tarefa == "6":
-                    # FIX: atualizar o estoque de livros quando for pago
                     dao.pagar(input("ID do pedido que deseja pagar: "))
 
                 elif tarefa == "7":
@@ -225,23 +224,26 @@ def carrinho(pedido_id):
             quantidade = ler_int("Quantidade de livros: ")
             
             novo_item = m.PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
-            dao.inserir(novo_item)
-            print("\nLivro inserindo no carrinho com sucesso!")
+            sucesso = dao.inserir(novo_item)
+            if sucesso:
+                print("\nLivro inserindo no carrinho com sucesso!")
 
         elif tarefa == "2":
+            # FIX: verificar ID
             dao.remover(input("Digite o ID do livro que deseja remover do carrinho: "))
             print("\nLivro removido do carrinho com sucesso!\n")
 
         elif tarefa == "3":
+            # FIX: mostrar valor total do pedido
             resultado = dao.listar_pedido(pedido_id)
-            print("Id   Pedido_Id   Livro_Id   Quantidade")
+            print("ID   Pedido_ID   Livro_ID    Titulo  Autor   Preço   Quantidade")
             for i in range(len(resultado)):
-                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}")
+                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}   {resultado[i][5]}   {resultado[i][6]}")
 
         elif tarefa == "4":
             dao = LivroDAO()
             resultado = dao.listar_todos()
-            print("Id   Título      Autor       Preço   Estoque")
+            print("ID   Título      Autor       Preço   Estoque")
             for i in range(len(resultado)):
                 print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}")
 

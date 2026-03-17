@@ -40,7 +40,7 @@ class LivroDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s", (id,)) # FIX: usar WHERE ativo=True para busca, quebra a lógica de remover()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
