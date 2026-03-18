@@ -4,6 +4,7 @@ from data_access_objects.pedidoDAO import PedidoDAO
 from data_access_objects.pedidoItemDAO import PedidoItemDAO
 
 import modelo as m
+import os
 
 
 def main():
@@ -51,20 +52,22 @@ def main():
 
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    print("ID   Nome       Email")
-                    for i in range(len(resultado)):
-                        print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}")
+                    exibir_tabela(
+                        ["ID", "Nome", "Email"],
+                        resultado,
+                    )
 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do cliente que deseja buscar: "))
-                    print(resultado)
+                    if resultado is None:
+                        print("\nCliente não encontrado.")
+                    else:
+                        exibir_tabela(["ID", "Nome", "Email"], [resultado])
 
                 elif tarefa == "6":
                     nome = ler_str_default("Nome: ")
                     resultado = dao.buscar_nome(nome)
-                    print("ID   Nome       Email")
-                    for i in range(len(resultado)):
-                        print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}")
+                    exibir_tabela(["ID", "Nome", "Email"], resultado)
 
                 elif tarefa == "7":
                     resultado = dao.gerar_relatorio()
@@ -72,6 +75,9 @@ def main():
 
                 elif tarefa == "0":
                     break
+
+                if tarefa != "0":
+                    pausar()
 
         elif opcao == "2":
             dao = LivroDAO()
@@ -120,21 +126,29 @@ def main():
                     
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    print("ID   Título      Autor       Preço   Estoque")
-                    for i in range(len(resultado)):
-                        print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}")
+                    exibir_tabela(
+                        ["ID", "Título", "Autor", "Preço", "Estoque"],
+                        resultado,
+                    )
                 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do livro que deseja buscar: "))
-                    print(resultado)
+                    if resultado is None:
+                        print("\nLivro não encontrado.")
+                    else:
+                        exibir_tabela(["ID", "Título", "Autor", "Preço", "Estoque"], [resultado])
                 
                 elif tarefa == "6":
                     resultado = dao.gerar_relatorio()
                     print(f"Total de livros: {resultado[0]}")
-                    print(f"Valor total em estoque: R$ {resultado[1]}")
+                    total_estoque = resultado[1] if resultado[1] is not None else 0
+                    print(f"Valor total em estoque: R$ {total_estoque:.2f}")
         
                 elif tarefa == "0":
                     break
+
+                if tarefa != "0":
+                    pausar()
 
         elif opcao == "3":
             dao = PedidoDAO()
@@ -167,22 +181,22 @@ def main():
 
                 elif tarefa == "3":
                     resultado = dao.listar_todos()
-                    print("ID   Cliente_ID   Data       Estado      Valor   Pago")
-                    for i in range(len(resultado)):
-                        print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
+                    exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"],resultado,)
 
                 elif tarefa == "4":
                     resultado = dao.listar_cliente(input("ID do Cliente: "))
-                    print("ID   Cliente_ID   Data       Estado      Valor   Pago")
-                    for i in range(len(resultado)):
-                        print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}       {resultado[i][4]}   {resultado[i][5]}")
+                    exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"],resultado,)
 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do pedido que deseja buscar: "))
-                    print(resultado)
+                    if resultado is None:
+                        print("\nPedido não encontrado.")
+                    else:
+                        exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"], [resultado])
 
                 elif tarefa == "6":
                     dao.pagar(input("ID do pedido que deseja pagar: "))
+                    print("\nPedido pago com sucesso!")
 
                 elif tarefa == "7":
                 
@@ -209,17 +223,23 @@ def main():
                         continue
 
                     dao.atualizar_estado(pedido_id, estado_novo)
+                    print("\nEstado do pedido atualizado com sucesso!")
 
                 elif tarefa == "8":
                     resultado = dao.gerar_relatorio()
                     print(f"Total de pedidos: {resultado[0]}")
-                    print(f"Valor total dos pedidos: R$ {resultado[1]}")
+                    total_pedidos = resultado[1] if resultado[1] is not None else 0
+                    print(f"Valor total dos pedidos: R$ {total_pedidos:.2f}")
 
                 elif tarefa == "0":
                     break
 
         elif opcao == "0":
             break
+
+        else:
+            print("\nOpção inválida.")
+            pausar()
 
 
 def carrinho(pedido_id):
@@ -258,34 +278,30 @@ def carrinho(pedido_id):
                 print("\nID do livro não encontrado no pedido!\n")
                 continue
 
-            dao.remover(livro_id)
+            dao.remover(pedido_id, livro_id)
             print("\nLivro removido do carrinho com sucesso!\n")
 
         elif tarefa == "3":
             resultado = dao.listar_pedido(pedido_id)
-            print("ID   Pedido_ID   Livro_ID    Titulo  Autor   Preço   Quantidade")
-            for i in range(len(resultado)):
-                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}   {resultado[i][5]}   {resultado[i][6]}")
-            # Mostrar valor total do pedido a partir da tabela pedido
+            exibir_tabela(["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"],resultado,)
             pedidoDao = PedidoDAO()
             pedido = pedidoDao.buscar_id(pedido_id)
             if pedido is not None:
-                print(f"\nValor total do pedido: R$ {pedido[4]}")
+                print(f"\nValor total do pedido: R$ {pedido[4]:.2f}")
             else:
                 print("\nNão foi possível obter o valor total do pedido.")
 
         elif tarefa == "4":
             dao = LivroDAO()
             resultado = dao.listar_todos()
-            print("ID   Título      Autor       Preço   Estoque")
-            for i in range(len(resultado)):
-                print(f"{resultado[i][0]}   {resultado[i][1]}       {resultado[i][2]}       {resultado[i][3]}   {resultado[i][4]}")
+            exibir_tabela(["ID", "Título", "Autor", "Preço", "Estoque"],resultado,)
 
         elif tarefa == "0":
             break
 
 
 def menu():
+    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Clientes\n"
         "2 - Livros\n"
@@ -295,6 +311,7 @@ def menu():
     return opcao
 
 def menuClientes():
+    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Inserir cliente\n"
         "2 - Alterar cliente\n"
@@ -309,6 +326,7 @@ def menuClientes():
 
 
 def menuLivros():
+    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Inserir livro\n"
         "2 - Alterar livro\n"
@@ -322,6 +340,7 @@ def menuLivros():
 
 
 def menuPedidos():
+    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Fazer pedido\n"
         "2 - Alterar pedido\n"
@@ -337,6 +356,7 @@ def menuPedidos():
 
 
 def menuPedidoItem():
+    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Inserir item\n"
         "2 - Remover item\n"
@@ -385,6 +405,47 @@ def ler_str_default(mensagem):
     if dado == "":
         dado = None
     return dado
+
+
+def limpar_tela():
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def pausar():
+    input("\nPressione Enter para continuar...")
+
+
+def formatar_celula(valor):
+    if valor is None:
+        return "-"
+    if isinstance(valor, bool):
+        return "Sim" if valor else "Não"
+    if isinstance(valor, float):
+        return f"{valor:.2f}"
+    return str(valor)
+
+
+def exibir_tabela(cabecalhos, linhas):
+    if not linhas:
+        print("\nNenhum registro encontrado.")
+        return
+
+    linhas_formatadas = [[formatar_celula(celula) for celula in linha] for linha in linhas]
+
+    larguras = []
+    for indice, cabecalho in enumerate(cabecalhos):
+        maior_linha = max(len(linha[indice]) for linha in linhas_formatadas)
+        larguras.append(max(len(cabecalho), maior_linha))
+
+    separador = "+-" + "-+-".join("-" * largura for largura in larguras) + "-+"
+
+    print()
+    print(separador)
+    print("| " + " | ".join(cabecalho.ljust(larguras[i]) for i, cabecalho in enumerate(cabecalhos)) + " |")
+    print(separador)
+    for linha in linhas_formatadas:
+        print("| " + " | ".join(linha[i].ljust(larguras[i]) for i in range(len(cabecalhos))) + " |")
+    print(separador)
 
 
 if __name__ == "__main__":

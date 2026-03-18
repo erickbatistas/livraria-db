@@ -17,7 +17,7 @@ class PedidoDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido")
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -26,7 +26,7 @@ class PedidoDAO(BaseDAO):
     def listar_cliente(self, cliente_id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s", (cliente_id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s ORDER BY id", (cliente_id,))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -35,7 +35,7 @@ class PedidoDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s", (id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s ORDER BY id", (id,))
         resultado = cursor.fetchone()
         cursor.close()
         con.close()

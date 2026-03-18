@@ -31,7 +31,7 @@ class ClienteDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, nome, email FROM cliente WHERE ativo=True")
+        cursor.execute("SELECT id, nome, email FROM cliente WHERE ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -40,7 +40,7 @@ class ClienteDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, nome, email FROM cliente WHERE id=%s", (id,)) # FIX: usar WHERE ativo=True para busca, quebra a lógica de remover()
+        cursor.execute("SELECT id, nome, email FROM cliente WHERE id=%s ORDER BY id", (id,)) # FIX: usar WHERE ativo=True para busca, quebra a lógica de remover()
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -49,7 +49,7 @@ class ClienteDAO(BaseDAO):
     def buscar_nome(self, nome):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, nome, email FROM cliente WHERE nome ILIKE %s AND ativo=True", (f"%{nome}%",))
+        cursor.execute("SELECT id, nome, email FROM cliente WHERE nome ILIKE %s AND ativo=True ORDER BY id", (f"%{nome}%",))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()

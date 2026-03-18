@@ -31,7 +31,7 @@ class LivroDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE ativo=True")
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -40,7 +40,7 @@ class LivroDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s ORDER BY id", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
