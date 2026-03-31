@@ -1,4 +1,4 @@
-from data_access_objects.baseDAO import BaseDAO
+from app.data_access_objects.baseDAO import BaseDAO
 
 
 class PedidoDAO(BaseDAO):
@@ -60,6 +60,26 @@ class PedidoDAO(BaseDAO):
         con = self.conectar()
         cursor = con.cursor()
         cursor.execute("UPDATE pedido SET estado=%s WHERE id=%s", (novo_estado, id))
+        con.commit()
+        cursor.close()
+        con.close()
+
+    def atualizar_valor(self, pedido_id):
+        con = self.conectar()
+        cursor = con.cursor()
+        # Primeiro, calcula o valor bruto somando o preço dos livros nos itens do pedido
+        cursor.execute("""
+            UPDATE pedido p
+            SET valor = sub.total_bruto * (1 - p.desconto)
+            FROM (
+                SELECT pi.pedido_id, SUM(l.preco * pi.quantidade) as total_bruto
+                FROM pedido_item pi
+                JOIN livro l ON pi.livro_id = l.id
+                WHERE pi.pedido_id = %s
+                GROUP BY pi.pedido_id
+            ) AS sub
+            WHERE p.id = sub.pedido_id;
+        """, (pedido_id,))
         con.commit()
         cursor.close()
         con.close()
