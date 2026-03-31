@@ -66,20 +66,23 @@ class PedidoDAO(BaseDAO):
 
     def atualizar_valor(self, pedido_id):
         con = self.conectar()
+        if con is None:
+            print("Não foi possível conectar ao banco para atualizar o valor do pedido.")
+            return
+            
         cursor = con.cursor()
         # Primeiro, calcula o valor bruto somando o preço dos livros nos itens do pedido
+        # Se não houver itens, o valor do pedido é zerado.
         cursor.execute("""
             UPDATE pedido p
-            SET valor = sub.total_bruto * (1 - p.desconto)
-            FROM (
-                SELECT pi.pedido_id, SUM(l.preco * pi.quantidade) as total_bruto
+            SET valor = COALESCE((
+                SELECT SUM(l.preco * pi.quantidade)
                 FROM pedido_item pi
                 JOIN livro l ON pi.livro_id = l.id
                 WHERE pi.pedido_id = %s
-                GROUP BY pi.pedido_id
-            ) AS sub
-            WHERE p.id = sub.pedido_id;
-        """, (pedido_id,))
+            ), 0) * (1 - p.desconto)
+            WHERE p.id = %s;
+        """, (pedido_id, pedido_id))
         con.commit()
         cursor.close()
         con.close()
