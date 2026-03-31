@@ -1,4 +1,4 @@
-from data_access_objects.baseDAO import BaseDAO
+from app.data_access_objects.baseDAO import BaseDAO
 
 
 class LivroDAO(BaseDAO):
@@ -42,6 +42,51 @@ class LivroDAO(BaseDAO):
         cursor = con.cursor()
         cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s ORDER BY id", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
         resultado = cursor.fetchone()
+        cursor.close()
+        con.close()
+        return resultado
+    
+    def buscar_por_nome(self, nome):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE titulo ILIKE %s AND ativo=True ORDER BY id", (f'%{nome}%',))
+        resultado = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return resultado
+
+    def buscar_por_preco(self, preco_min, preco_max):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE preco BETWEEN %s AND %s AND ativo=True ORDER BY preco", (preco_min, preco_max))
+        resultado = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return resultado
+
+    def buscar_por_categoria(self, categoria):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE categoria ILIKE %s AND ativo=True ORDER BY id", (f'%{categoria}%',))
+        resultado = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return resultado
+
+    def buscar_fabricado_em_mari(self):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE fabricado_em_mari=True AND ativo=True ORDER BY id")
+        resultado = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return resultado
+    
+    def listar_pouco_estoque(self):
+        con = self.conectar()
+        cursor = con.cursor()
+        cursor.execute("SELECT id, titulo, autor, estoque FROM vw_livros_pouco_estoque")
+        resultado = cursor.fetchall()
         cursor.close()
         con.close()
         return resultado

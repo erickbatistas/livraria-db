@@ -1,0 +1,3 @@
+@echo off
+echo Executando testes automatizados...
+uv run python -m unittest discover

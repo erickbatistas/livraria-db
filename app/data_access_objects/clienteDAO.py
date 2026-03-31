@@ -1,4 +1,4 @@
-from data_access_objects.baseDAO import BaseDAO
+from app.data_access_objects.baseDAO import BaseDAO
 
 
 class ClienteDAO(BaseDAO):

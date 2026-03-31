@@ -1,12 +1,13 @@
-from data_access_objects.clienteDAO import ClienteDAO
-from data_access_objects.livroDAO import LivroDAO
-from data_access_objects.pedidoDAO import PedidoDAO
-from data_access_objects.pedidoItemDAO import PedidoItemDAO
-from data_access_objects.funcionarioDAO import FuncionarioDAO
-from data_access_objects.fornecedorDAO import FornecedorDAO
+from app.data_access_objects.clienteDAO import ClienteDAO
+from app.data_access_objects.livroDAO import LivroDAO
+from app.data_access_objects.pedidoDAO import PedidoDAO
+from app.data_access_objects.pedidoItemDAO import PedidoItemDAO
+from app.data_access_objects.funcionarioDAO import FuncionarioDAO
+from app.data_access_objects.fornecedorDAO import FornecedorDAO
+from app.data_access_objects.relatorioDAO import RelatorioDAO
 from tabulate import tabulate
 
-import modelo as m
+from app import modelo as m
 import os
 
 
@@ -165,6 +166,35 @@ def main():
                         print(tabulate([resultado], headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10] ))
                 
                 elif tarefa == "6":
+                    nome = ler_str("Buscar por nome: ")
+                    resultado = dao.buscar_por_nome(nome)
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
+
+                elif tarefa == "7":
+                    categoria = ler_str("Buscar por categoria: ")
+                    resultado = dao.buscar_por_categoria(categoria)
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
+
+                elif tarefa == "8":
+                    preco_min = ler_float("Preço mínimo: ")
+                    preco_max = ler_float("Preço máximo: ")
+                    resultado = dao.buscar_por_preco(preco_min, preco_max)
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
+
+                elif tarefa == "9":
+                    resultado = dao.buscar_fabricado_em_mari()
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
+
+                elif tarefa == "10":
+                    resultado = dao.listar_pouco_estoque()
+                    cabecalhos = ["ID", "Título", "Autor", "Estoque"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10]))
+
+                elif tarefa == "11":
                     resultado = dao.gerar_relatorio()
                     print(f"Total de livros: {resultado[0]}")
                     total_estoque = resultado[1] if resultado[1] is not None else 0
@@ -379,6 +409,21 @@ def main():
                     else:
                         cabecalhos = ["ID", "Nome", "Cargo", "Email"]
                         print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 20, 25]))
+
+                elif tarefa == "6":
+                    print("\n-- Relatório de Vendas por Vendedor --")
+                    mes = ler_int("Digite o mês (1-12): ")
+                    ano = ler_int("Digite o ano: ")
+                    dao_relatorio = RelatorioDAO()
+                    resultado = dao_relatorio.gerar_relatorio_vendas_vendedor(mes, ano)
+                    
+                    if not resultado:
+                        print(f"\nNenhuma venda encontrada para {mes}/{ano}.")
+                    else:
+                        cabecalhos = ["Vendedor", "Total de Vendas", "Valor Total Vendido"]
+                        # Formata o valor total para duas casas decimais
+                        resultado_formatado = [(nome, total, f"R$ {valor:.2f}" if valor else "R$ 0.00") for nome, total, valor in resultado]
+                        print(tabulate(resultado_formatado, headers=cabecalhos, tablefmt="fancy_grid"))
 
                 elif tarefa == "0":
                     break
@@ -595,7 +640,12 @@ def menuLivros():
         "3 - Remover livro\n"
         "4 - Listar todos livros\n"
         "5 - Buscar por ID\n"
-        "6 - Gerar relatório de livros\n"
+        "6 - Buscar por nome\n"
+        "7 - Buscar por categoria\n"
+        "8 - Buscar por faixa de preço\n"
+        "9 - Buscar livros fabricados em Mari\n"
+        "10 - Listar livros com pouco estoque\n"
+        "11 - Gerar relatório de livros\n"
         "0 - Voltar\n"
         "Terminal: ")
     return opcao 
@@ -636,6 +686,7 @@ def menuFuncionarios():
         "3 - Remover funcionário\n"
         "4 - Listar todos funcionários\n"
         "5 - Buscar por ID\n"
+        "6 - Relatório de vendas por vendedor\n"
         "0 - Voltar\n"
         "Terminal: ")
     return opcao

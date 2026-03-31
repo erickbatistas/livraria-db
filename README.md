@@ -151,3 +151,19 @@ projeto. Ou rodá-lo por meio de um ambiente em nuvem.
 
 É necessário que tenha interface gráfica e deve ser uma aplicação pronta para uso. A interface
 gráfica pode ser em console, web, desktop ou app. Escolha aquela que possui maior familiaridade.
+
+## Como Executar a Aplicação
+
+Para iniciar a aplicação, execute o script `run.bat`. No terminal PowerShell, use o seguinte comando a partir da pasta raiz do projeto:
+
+```powershell
+.\\run.bat
+```
+
+## Como Rodar os Testes
+
+Para executar a suíte de testes automatizados, execute o script `test.bat`. No terminal PowerShell, use o seguinte comando a partir da pasta raiz do projeto:
+
+```powershell
+.\\test.bat
+```
