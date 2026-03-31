@@ -11,13 +11,20 @@ class PedidoDAO(BaseDAO):
         cursor.close()
         con.close()
 
-    def remover(self):
-        pass
+    def remover(self, id):
+        con = self.conectar()
+        if con is None:
+            raise Exception("Não foi possível conectar ao banco para remover pedido")
+        cursor = con.cursor()
+        cursor.execute("DELETE FROM pedido WHERE id=%s", (id,))
+        con.commit()
+        cursor.close()
+        con.close()
 
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido ORDER BY id")
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -26,7 +33,7 @@ class PedidoDAO(BaseDAO):
     def listar_cliente(self, cliente_id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s ORDER BY id", (cliente_id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s AND ativo=True ORDER BY id", (cliente_id,))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -35,7 +42,7 @@ class PedidoDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s ORDER BY id", (id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s AND ativo=True ORDER BY id", (id,))
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -60,7 +67,7 @@ class PedidoDAO(BaseDAO):
     def gerar_relatorio(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT COUNT(*), SUM(valor) FROM pedido")
+        cursor.execute("SELECT COUNT(*), SUM(valor) FROM pedido WHERE ativo=True")
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -69,8 +76,8 @@ class PedidoDAO(BaseDAO):
     def id_ultimo_pedido(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id FROM pedido ORDER BY id DESC LIMIT 1")
+        cursor.execute("SELECT id FROM pedido WHERE ativo=True ORDER BY id DESC LIMIT 1")
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
-        return resultado
+        return resultado[0] if resultado is not None else None
