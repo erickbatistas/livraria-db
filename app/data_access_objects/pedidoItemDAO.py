@@ -70,3 +70,22 @@ class PedidoItemDAO(BaseDAO):
         cursor.close()
         con.close()
         return resultado
+
+    def gerar_relatorio(self):
+        con = self.conectar()
+        cursor = con.cursor()
+        query = """
+            SELECT 
+                pi.pedido_id,
+                l.titulo AS livro_titulo,
+                pi.quantidade,
+                (pi.quantidade * l.preco) AS valor_item
+            FROM pedido_item pi
+            JOIN livro l ON pi.livro_id = l.id
+            ORDER BY pi.pedido_id, l.titulo
+        """
+        cursor.execute(query)
+        resultado = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return resultado

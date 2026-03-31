@@ -49,8 +49,23 @@ class LivroDAO(BaseDAO):
     def gerar_relatorio(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT COUNT(*), SUM(preco * estoque) FROM livro")
-        resultado = cursor.fetchone()
+        query = """
+            SELECT
+                l.id,
+                l.titulo,
+                l.autor,
+                l.preco,
+                l.estoque,
+                COALESCE(SUM(pi.quantidade), 0) AS total_vendido,
+                COALESCE(SUM(pi.quantidade * l.preco), 0) AS receita_total
+            FROM livro l
+            LEFT JOIN pedido_item pi ON l.id = pi.livro_id
+            WHERE l.ativo = True
+            GROUP BY l.id, l.titulo, l.autor, l.preco, l.estoque
+            ORDER BY total_vendido DESC
+        """
+        cursor.execute(query)
+        resultado = cursor.fetchall()
         cursor.close()
         con.close()
         return resultado
