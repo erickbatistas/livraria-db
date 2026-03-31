@@ -5,8 +5,8 @@ class PedidoDAO(BaseDAO):
     def inserir(self, pedido):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("INSERT INTO pedido (cliente_id, estado, valor, pago) VALUES (%s, %s, %s, %s)", 
-                       (pedido.cliente_id, pedido.estado, pedido.valor, pedido.pago))
+        cursor.execute("INSERT INTO pedido (cliente_id, funcionario_id, estado, valor, pago, forma_pagamento, desconto) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
+                       (pedido.cliente_id, pedido.funcionario_id, pedido.estado, pedido.valor, pedido.pago, pedido.forma_pagamento, pedido.desconto))
         con.commit()
         cursor.close()
         con.close()
