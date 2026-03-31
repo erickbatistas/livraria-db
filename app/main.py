@@ -2,6 +2,8 @@ from data_access_objects.clienteDAO import ClienteDAO
 from data_access_objects.livroDAO import LivroDAO
 from data_access_objects.pedidoDAO import PedidoDAO
 from data_access_objects.pedidoItemDAO import PedidoItemDAO
+from data_access_objects.funcionarioDAO import FuncionarioDAO
+from data_access_objects.fornecedorDAO import FornecedorDAO
 from tabulate import tabulate
 
 import modelo as m
@@ -180,15 +182,45 @@ def main():
                 tarefa = menuPedidos()
 
                 if tarefa == "1":
-                    dao = ClienteDAO() # Hack
+                    dao_cliente = ClienteDAO()
+                    dao_funcionario = FuncionarioDAO()
+
                     print("\n-- Fazer pedido --")
                     cliente_id = ler_int("ID do Cliente: ")
-                    if dao.buscar_id(cliente_id) is None:
-                        print("\nID inválido!\n")
+                    if dao_cliente.buscar_id(cliente_id) is None:
+                        print("\nID de cliente inválido!\n")
+                        continue
+
+                    funcionario_id = ler_int("ID do Vendedor (Funcionário): ")
+                    if dao_funcionario.buscar_id(funcionario_id) is None:
+                        print("\nID de funcionário inválido!\n")
                         continue
                     
-                    dao = PedidoDAO() # Hack
-                    novo_pedido = m.Pedido(id=None, cliente_id=cliente_id, data=None, estado="EM_ANDAMENTO", valor=0.0, pago=False)
+                    # Lógica de Desconto
+                    desconto = 0.0
+                    print("\n-- Verificação de Desconto --")
+                    torce_flamengo = input("O cliente torce para o Flamengo? (s/N): ").lower() == 's'
+                    assiste_one_piece = input("O cliente assiste One Piece? (s/N): ").lower() == 's'
+                    de_sousa = input("O cliente é de Sousa-PB? (s/N): ").lower() == 's'
+
+                    if torce_flamengo or assiste_one_piece or de_sousa:
+                        desconto = 0.1 # 10% de desconto
+                        print(f"\nDesconto de {desconto*100}% aplicado!")
+
+                    forma_pagamento = input("Forma de pagamento (cartao, boleto, pix, berries): ").strip().lower()
+
+                    dao = PedidoDAO()
+                    novo_pedido = m.Pedido(
+                        id=None, 
+                        cliente_id=cliente_id, 
+                        funcionario_id=funcionario_id,
+                        data=None, 
+                        estado="EM_ANDAMENTO", 
+                        valor=0.0, 
+                        pago=False,
+                        forma_pagamento=forma_pagamento,
+                        desconto=desconto
+                    )
                     dao.inserir(novo_pedido)
                     print("\nPedido aberto com sucesso!")
                     pedido_id = dao.id_ultimo_pedido()
@@ -274,6 +306,152 @@ def main():
                     print(f"Total de pedidos: {resultado[0]}")
                     total_pedidos = resultado[1] if resultado[1] is not None else 0
                     print(f"Valor total dos pedidos: R$ {total_pedidos:.2f}")
+
+                elif tarefa == "0":
+                    break
+
+                if tarefa != "0":
+                    pausar()
+
+        elif opcao == "4":
+            dao = FuncionarioDAO()
+            while True:
+                tarefa = menuFuncionarios()
+
+                if tarefa == "1":
+                    print("\n-- Cadastrar Novo Funcionário --")
+                    nome = ler_str("Nome: ")
+                    cargo = ler_str("Cargo: ")
+                    email = ler_str_default("Email: ")
+                    
+                    novo_funcionario = m.Funcionario(id=None, nome=nome, cargo=cargo, email=email, ativo=True)
+                    dao.inserir(novo_funcionario)
+                    print("\nFuncionário cadastrado com sucesso!")
+
+                elif tarefa == "2":
+                    id_alterar = input("Digite o ID do funcionário que deseja alterar: ")
+                    if dao.buscar_id(id_alterar) is None:
+                        print("\nID inválido!\n")
+                        continue
+                    print("\n-- Digite os novos dados")
+
+                    novo_nome = ler_str("Novo Nome: ")
+                    novo_cargo = ler_str("Novo Cargo: ")
+                    novo_email = ler_str_default("Novo Email: ")
+                    novo_ativo = input("Ativo? (s/N): ").lower() == 's'
+
+                    funcionario_atualizado = m.Funcionario(
+                        id=id_alterar, 
+                        nome=novo_nome,
+                        cargo=novo_cargo,
+                        email=novo_email,
+                        ativo=novo_ativo
+                    )
+                    dao.alterar(funcionario_atualizado)
+                    print("Funcionário atualizado com sucesso!")
+
+                elif tarefa == "3":
+                    funcid = input("Digite o ID do funcionário que deseja remover: ")
+                    resultado = dao.buscar_id(funcid)
+
+                    if resultado is None:
+                        print("\nID inválido!\n")
+                        continue
+                    
+                    else:
+                        print("\nFuncionário removido:")
+                        cabecalhos = ["ID", "Nome", "Cargo", "Email"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 20, 25]))
+                        dao.remover(funcid)
+                   
+
+                    print("\n")
+
+                elif tarefa == "4":
+                    resultado = dao.listar_todos()
+                    cabecalhos = ["ID", "Nome", "Cargo", "Email"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 20, 25]))
+
+                elif tarefa == "5":
+                    resultado = dao.buscar_id(input("Digite o ID do funcionário que deseja buscar: "))
+                    if resultado is None:
+                        print("\nFuncionário não encontrado.")
+                    else:
+                        cabecalhos = ["ID", "Nome", "Cargo", "Email"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 20, 25]))
+
+                elif tarefa == "0":
+                    break
+
+                if tarefa != "0":
+                    pausar()
+
+        elif opcao == "5":
+            dao = FornecedorDAO()
+            while True:
+                tarefa = menuFornecedores()
+
+                if tarefa == "1":
+                    print("\n-- Cadastrar Novo Fornecedor --")
+                    nome = ler_str("Nome: ")
+                    email = ler_str_default("Email: ")
+                    telefone = ler_str_default("Telefone: ")
+                    
+                    novo_fornecedor = m.Fornecedor(id=None, nome=nome, email=email, telefone=telefone, ativo=True)
+                    dao.inserir(novo_fornecedor)
+                    print("\nFornecedor cadastrado com sucesso!")
+
+                elif tarefa == "2":
+                    id_alterar = input("Digite o ID do fornecedor que deseja alterar: ")
+                    if dao.buscar_id(id_alterar) is None:
+                        print("\nID inválido!\n")
+                        continue
+                    print("\n-- Digite os novos dados")
+
+                    novo_nome = ler_str("Novo Nome: ")
+                    novo_email = ler_str_default("Novo Email: ")
+                    novo_telefone = ler_str_default("Novo Telefone: ")
+                    novo_ativo = input("Ativo? (s/N): ").lower() == 's'
+
+                    fornecedor_atualizado = m.Fornecedor(
+                        id=id_alterar, 
+                        nome=novo_nome,
+                        email=novo_email,
+                        telefone=novo_telefone,
+                        ativo=novo_ativo
+                    )
+                    dao.alterar(fornecedor_atualizado)
+                    print("Fornecedor atualizado com sucesso!")
+
+                elif tarefa == "3":
+                    fornecedorid = input("Digite o ID do fornecedor que deseja remover: ")
+                    resultado = dao.buscar_id(fornecedorid)
+
+                    if resultado is None:
+                        print("\nID inválido!\n")
+                        continue
+                    
+                    else:
+                        print("\nFornecedor removido:")
+                        cabecalhos = ["ID", "Nome", "Email", "Telefone"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 15]))
+                        dao.remover(fornecedorid)
+                   
+
+                    print("\n")
+
+                elif tarefa == "4":
+                    resultado = dao.listar_todos()
+                    cabecalhos = ["ID", "Nome", "Email", "Telefone"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 15]))
+
+                elif tarefa == "5":
+                    resultado = dao.buscar_id(input("Digite o ID do fornecedor que deseja buscar: "))
+                    if resultado is None:
+                        print("\nFornecedor não encontrado.")
+                    else:
+                        cabecalhos = ["ID", "Nome", "Email", "Telefone"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 15]))
 
                 elif tarefa == "0":
                     break
@@ -388,6 +566,8 @@ def menu():
         "1 - Clientes\n"
         "2 - Livros\n"
         "3 - Pedidos\n"
+        "4 - Funcionários\n"
+        "5 - Fornecedores\n"
         "0 - Sair\n"
         "Terminal: ")
     return opcao
@@ -443,6 +623,31 @@ def menuPedidoItem():
         "2 - Remover item\n"
         "3 - Listar pedido\n"
         "4 - Listar livros\n"
+        "0 - Voltar\n"
+        "Terminal: ")
+    return opcao
+
+
+def menuFuncionarios():
+    limpar_tela()
+    opcao = input("\nOpções:\n"
+        "1 - Inserir funcionário\n"
+        "2 - Alterar funcionário\n"
+        "3 - Remover funcionário\n"
+        "4 - Listar todos funcionários\n"
+        "5 - Buscar por ID\n"
+        "0 - Voltar\n"
+        "Terminal: ")
+    return opcao
+
+def menuFornecedores():
+    limpar_tela()
+    opcao = input("\nOpções:\n"
+        "1 - Inserir fornecedor\n"
+        "2 - Alterar fornecedor\n"
+        "3 - Remover fornecedor\n"
+        "4 - Listar todos fornecedores\n"
+        "5 - Buscar por ID\n"
         "0 - Voltar\n"
         "Terminal: ")
     return opcao
