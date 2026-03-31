@@ -23,7 +23,7 @@ class ClienteDAO(BaseDAO):
     def remover(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("UPDATE cliente SET ativo=False WHERE id=%s", (id,))
+        cursor.execute("UPDATE cliente SET ativo=False WHERE id=%s", (id,)) #SOFT DELETE: apenas marca o cliente como inativo, sem remover da base de dados
         con.commit()
         cursor.close()
         con.close()
@@ -37,7 +37,7 @@ class ClienteDAO(BaseDAO):
         con.close()
         return resultado
 
-    def buscar_id(self, id):
+    def buscar_id(self, id): #busca uma linha por id
         con = self.conectar()
         cursor = con.cursor()
         cursor.execute("SELECT id, nome, email FROM cliente WHERE id=%s ORDER BY id", (id,)) # FIX: usar WHERE ativo=True para busca, quebra a lógica de remover()
@@ -58,8 +58,27 @@ class ClienteDAO(BaseDAO):
     def gerar_relatorio(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT COUNT(*) FROM cliente")
-        resultado = cursor.fetchone()
+        query = """
+            SELECT 
+                c.id,
+                c.nome, 
+                c.email, 
+                COUNT(p.id) AS total_pedidos, 
+                COALESCE(SUM(p.valor), 0) AS total_gasto,
+                MAX(p.data_pedido) AS data_ultima_compra,
+                COALESCE(AVG(p.valor), 0) AS ticket_medio
+            FROM cliente c
+            LEFT JOIN pedido p ON c.id = p.cliente_id 
+                 AND p.data_pedido >= NOW() - INTERVAL '6 months'
+            WHERE c.ativo = True
+            GROUP BY c.id, c.nome, c.email
+            ORDER BY total_gasto DESC
+        """
+        cursor.execute(query)
+        
+        #RELATÓRIO: lista os clientes ativos e quantos pedidos eles fizeram nos últimos 6 meses, ordenado do cliente que mais comprou para o que menos comprou
+
+        resultado = cursor.fetchall()
         cursor.close()
         con.close()
         return resultado

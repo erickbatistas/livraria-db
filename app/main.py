@@ -2,6 +2,7 @@ from data_access_objects.clienteDAO import ClienteDAO
 from data_access_objects.livroDAO import LivroDAO
 from data_access_objects.pedidoDAO import PedidoDAO
 from data_access_objects.pedidoItemDAO import PedidoItemDAO
+from tabulate import tabulate
 
 import modelo as m
 import os
@@ -47,31 +48,44 @@ def main():
                     print("Cliente atualizado com sucesso!")
 
                 elif tarefa == "3":
-                    dao.remover(input("Digite o ID do cliente que deseja remover: "))
-                    print("\nCliente removido com sucesso!\n")
+                    clientid = input("Digite o ID do cliente que deseja remover: ")
+                    resultado = dao.buscar_id(clientid)
+
+                    if resultado is None:
+                        print("\nID inválido!\n")
+                        continue
+                    
+                    else:
+                        print("\nCliente removido:")
+                        cabecalhos = ["ID", "Nome", "Email"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25]))
+                        dao.remover(clientid)
+                   
+
+                    print("\n")
 
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    exibir_tabela(
-                        ["ID", "Nome", "Email"],
-                        resultado,
-                    )
+                    cabecalhos = ["ID", "Nome", "Email"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25]))
 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do cliente que deseja buscar: "))
                     if resultado is None:
                         print("\nCliente não encontrado.")
                     else:
-                        exibir_tabela(["ID", "Nome", "Email"], [resultado])
+                        cabecalhos = ["ID", "Nome", "Email"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25]))
 
                 elif tarefa == "6":
                     nome = ler_str_default("Nome: ")
                     resultado = dao.buscar_nome(nome)
-                    exibir_tabela(["ID", "Nome", "Email"], resultado)
+                    print(tabulate(resultado, ["ID", "Nome", "Email"], tablefmt="fancy_grid", maxcolwidths=[5, 20, 25] ))
 
                 elif tarefa == "7":
                     resultado = dao.gerar_relatorio()
-                    print(f"Total de clientes: {resultado[0]}")
+                    cabecalhos = ["ID", "Nome", "Email", "Total Pedidos", "Total Gasto", "Data Última Compra", "Ticket Médio"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8] ))
 
                 elif tarefa == "0":
                     break
@@ -121,22 +135,32 @@ def main():
                     print("Livro atualizado com sucesso!")
                     
                 elif tarefa == "3":
-                    dao.remover(input("Digite o ID do livro que deseja remover: "))
-                    print("\nLivro removido com sucesso!\n")
+                    livroid = input("Digite o ID do livro que deseja remover: ")
+                    resultado = dao.buscar_id(livroid)
+
+                    if resultado is None:
+                        print("\nID inválido!\n")
+                        continue
+                    else:
+                        print("\nLivro removido:")
+                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                        print(tabulate([resultado], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
+                        dao.remover(livroid)
+
+                    print("\n")
                     
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    exibir_tabela(
-                        ["ID", "Título", "Autor", "Preço", "Estoque"],
-                        resultado,
-                    )
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
                 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do livro que deseja buscar: "))
                     if resultado is None:
                         print("\nLivro não encontrado.")
                     else:
-                        exibir_tabela(["ID", "Título", "Autor", "Preço", "Estoque"], [resultado])
+                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                        print(tabulate([resultado], headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10] ))
                 
                 elif tarefa == "6":
                     resultado = dao.gerar_relatorio()
@@ -181,22 +205,36 @@ def main():
 
                 elif tarefa == "3":
                     resultado = dao.listar_todos()
-                    exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"],resultado,)
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
 
                 elif tarefa == "4":
                     resultado = dao.listar_cliente(input("ID do Cliente: "))
-                    exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"],resultado,)
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                    print(tabulate(resultado, headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10] ))
 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do pedido que deseja buscar: "))
                     if resultado is None:
                         print("\nPedido não encontrado.")
                     else:
-                        exibir_tabela(["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"], [resultado])
+                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
 
                 elif tarefa == "6":
-                    dao.pagar(input("ID do pedido que deseja pagar: "))
-                    print("\nPedido pago com sucesso!")
+                    id_pagar = input("ID do pedido que deseja pagar: ")
+                    pedido_para_pagar = dao.buscar_id(id_pagar)
+                    if pedido_para_pagar is None:
+                        print("\nPedido não encontrado.")
+                    else:
+                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                        print(tabulate([pedido_para_pagar], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+                        confirmar = input("Confirmar pagamento? (s/N): ").strip().lower() == 's'
+                        if confirmar:
+                            dao.pagar(id_pagar)
+                            print("\nPedido pago com sucesso!")
+                        else:
+                            print("\nOperação cancelada pelo usuário.")
 
                 elif tarefa == "7":
                 
@@ -222,8 +260,14 @@ def main():
                         print("\nOperação não permitida: o pedido precisa ser pago antes de enviar/entregar.\n")
                         continue
 
-                    dao.atualizar_estado(pedido_id, estado_novo)
-                    print("\nEstado do pedido atualizado com sucesso!")
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                    print(tabulate([pedido], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+                    confirmar = input(f"Confirmar mudança para '{estado_novo}'? (s/N): ").strip().lower() == 's'
+                    if confirmar:
+                        dao.atualizar_estado(pedido_id, estado_novo)
+                        print("\nEstado do pedido atualizado com sucesso!")
+                    else:
+                        print("\nOperação cancelada pelo usuário.")
 
                 elif tarefa == "8":
                     resultado = dao.gerar_relatorio()
@@ -234,6 +278,9 @@ def main():
                 elif tarefa == "0":
                     break
 
+                if tarefa != "0":
+                    pausar()
+
         elif opcao == "0":
             break
 
@@ -243,6 +290,14 @@ def main():
 
 
 def carrinho(pedido_id):
+    # valida pedido existe
+    pedidoDao = PedidoDAO()
+    pedido_valid = pedidoDao.buscar_id(pedido_id)
+    if pedido_valid is None:
+        print("\nPedido inválido ou não encontrado. Voltando ao menu.")
+        pausar()
+        return
+
     while True:
         dao = PedidoItemDAO()
         tarefa = menuPedidoItem()
@@ -251,12 +306,17 @@ def carrinho(pedido_id):
             print("\n-- Inserir livro no carrinho --")
             livro_id = ler_int("ID do livro: ")
             quantidade = ler_int("Quantidade de livros: ")
-            
-            novo_item = m.PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
-            sucesso = dao.inserir(novo_item)
-            if sucesso:
-                print("\nLivro inserindo no carrinho com sucesso!")
+            try:
+                novo_item = m.PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
+                sucesso = dao.inserir(novo_item)
+                if sucesso:
+                    print("\nLivro inserido no carrinho com sucesso!")
+                else:
+                    print("\nFalha ao inserir o livro no carrinho.")
+            except Exception as e:
+                print(f"\nErro ao inserir item no pedido: {e}")
 
+  
         elif tarefa == "2":
            
             livro_id_str = input("Digite o ID do livro que deseja remover do carrinho: ")
@@ -267,37 +327,59 @@ def carrinho(pedido_id):
                 continue
 
             itens = dao.listar_pedido(pedido_id)
-            existe = False
-            for item in itens:
-                # item[2] é o livro_id retornado por listar_pedido
-                if item[2] == livro_id:
-                    existe = True
+            item_encontrado = None
+            for it in itens:
+                # it[2] é o livro_id retornado por listar_pedido
+                if it[2] == livro_id:
+                    item_encontrado = it
                     break
 
-            if not existe:
+            if item_encontrado is None:
                 print("\nID do livro não encontrado no pedido!\n")
                 continue
 
-            dao.remover(pedido_id, livro_id)
-            print("\nLivro removido do carrinho com sucesso!\n")
+            try:
+                # mostra o item que será removido
+                print("\nRemovendo o seguinte item:")
+                cabecalhos = ["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"]
+                print(tabulate([item_encontrado], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 10, 30, 20, 10, 10]))
+                confirmar = input("Confirmar remoção? (s/N): ").strip().lower() == 's'
+                if not confirmar:
+                    print("\nOperação cancelada pelo usuário.\n")
+                else:
+                    dao.remover(pedido_id, livro_id)
+
+                    # Verifica se foi removido
+                    itens_apos = dao.listar_pedido(pedido_id)
+                    still = any(it[2] == livro_id for it in itens_apos)
+                    if not still:
+                        print("\nLivro removido do carrinho com sucesso!\n")
+                    else:
+                        print("\nFalha ao remover o item do carrinho.\n")
+            except Exception as e:
+                print(f"\nErro ao remover item do pedido: {e}\n")
 
         elif tarefa == "3":
             resultado = dao.listar_pedido(pedido_id)
-            exibir_tabela(["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"],resultado,)
+            cabecalhos = ["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"]
+            print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 10, 30, 20, 10, 10] ))
             pedidoDao = PedidoDAO()
             pedido = pedidoDao.buscar_id(pedido_id)
             if pedido is not None:
                 print(f"\nValor total do pedido: R$ {pedido[4]:.2f}")
             else:
                 print("\nNão foi possível obter o valor total do pedido.")
-
+                
         elif tarefa == "4":
             dao = LivroDAO()
             resultado = dao.listar_todos()
-            exibir_tabela(["ID", "Título", "Autor", "Preço", "Estoque"],resultado,)
+            cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+            print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8] ))
 
         elif tarefa == "0":
             break
+        if tarefa != "0":
+            pausar()
 
 
 def menu():
@@ -356,7 +438,6 @@ def menuPedidos():
 
 
 def menuPedidoItem():
-    limpar_tela()
     opcao = input("\nOpções:\n"
         "1 - Inserir item\n"
         "2 - Remover item\n"
@@ -425,27 +506,7 @@ def formatar_celula(valor):
     return str(valor)
 
 
-def exibir_tabela(cabecalhos, linhas):
-    if not linhas:
-        print("\nNenhum registro encontrado.")
-        return
 
-    linhas_formatadas = [[formatar_celula(celula) for celula in linha] for linha in linhas]
-
-    larguras = []
-    for indice, cabecalho in enumerate(cabecalhos):
-        maior_linha = max(len(linha[indice]) for linha in linhas_formatadas)
-        larguras.append(max(len(cabecalho), maior_linha))
-
-    separador = "+-" + "-+-".join("-" * largura for largura in larguras) + "-+"
-
-    print()
-    print(separador)
-    print("| " + " | ".join(cabecalho.ljust(larguras[i]) for i, cabecalho in enumerate(cabecalhos)) + " |")
-    print(separador)
-    for linha in linhas_formatadas:
-        print("| " + " | ".join(linha[i].ljust(larguras[i]) for i in range(len(cabecalhos))) + " |")
-    print(separador)
 
 
 if __name__ == "__main__":

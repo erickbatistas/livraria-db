@@ -55,5 +55,14 @@ class LivroDAO(BaseDAO):
         con.close()
         return resultado
 
-    def atualizar_quantidade(self, delta):
-        pass
+    def atualizar_quantidade(self, livro_id, delta):
+        con = self.conectar()
+        if con is None:
+            raise Exception("Não foi possível conectar ao banco para atualizar quantidade do livro")
+        cursor = con.cursor()
+        cursor.execute("UPDATE livro SET estoque = estoque + %s WHERE id=%s RETURNING estoque", (delta, livro_id))
+        resultado = cursor.fetchone()
+        con.commit()
+        cursor.close()
+        con.close()
+        return resultado[0] if resultado is not None else None

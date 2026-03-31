@@ -26,6 +26,7 @@ CREATE TABLE pedido (
     estado estado_pedido DEFAULT 'EM_ANDAMENTO',
     valor DECIMAL(10, 2) DEFAULT 0.00,
     pago BOOLEAN DEFAULT FALSE,
+    ativo BOOLEAN DEFAULT TRUE,
     
     -- Chave Estrangeira: impede criar pedido para cliente inexistente
     CONSTRAINT fk_cliente FOREIGN KEY (cliente_id) 

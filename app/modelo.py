@@ -33,6 +33,7 @@ class Pedido:
         self.estado = estado
         self.valor = valor
         self.pago = pago
+        self.ativo = True
 
 
 class PedidoItem:
