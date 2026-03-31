@@ -67,8 +67,24 @@ class PedidoDAO(BaseDAO):
     def gerar_relatorio(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT COUNT(*), SUM(valor) FROM pedido WHERE ativo=True")
-        resultado = cursor.fetchone()
+        query = """
+            SELECT 
+                p.id,
+                c.nome AS cliente_nome,
+                p.data_pedido,
+                p.estado,
+                p.valor,
+                p.pago,
+                COUNT(pi.id) AS total_itens
+            FROM pedido p
+            JOIN cliente c ON p.cliente_id = c.id
+            LEFT JOIN pedido_item pi ON p.id = pi.pedido_id
+            WHERE p.ativo = True
+            GROUP BY p.id, c.nome, p.data_pedido, p.estado, p.valor, p.pago
+            ORDER BY p.data_pedido DESC
+        """
+        cursor.execute(query)
+        resultado = cursor.fetchall()
         cursor.close()
         con.close()
         return resultado

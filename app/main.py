@@ -164,9 +164,8 @@ def main():
                 
                 elif tarefa == "6":
                     resultado = dao.gerar_relatorio()
-                    print(f"Total de livros: {resultado[0]}")
-                    total_estoque = resultado[1] if resultado[1] is not None else 0
-                    print(f"Valor total em estoque: R$ {total_estoque:.2f}")
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Total Vendido", "Receita Total"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8, 10, 10]))
         
                 elif tarefa == "0":
                     break
@@ -271,9 +270,8 @@ def main():
 
                 elif tarefa == "8":
                     resultado = dao.gerar_relatorio()
-                    print(f"Total de pedidos: {resultado[0]}")
-                    total_pedidos = resultado[1] if resultado[1] is not None else 0
-                    print(f"Valor total dos pedidos: R$ {total_pedidos:.2f}")
+                    cabecalhos = ["ID", "Cliente", "Data", "Estado", "Valor", "Pago", "Total Itens"]
+                    print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 20, 12, 10, 5, 10]))
 
                 elif tarefa == "0":
                     break
@@ -376,6 +374,11 @@ def carrinho(pedido_id):
             cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
             print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8] ))
 
+        elif tarefa == "5":
+            resultado = dao.gerar_relatorio()
+            cabecalhos = ["Pedido ID", "Livro", "Quantidade", "Valor Total"]
+            print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[10, 30, 10, 10]))
+
         elif tarefa == "0":
             break
         if tarefa != "0":
@@ -443,6 +446,7 @@ def menuPedidoItem():
         "2 - Remover item\n"
         "3 - Listar pedido\n"
         "4 - Listar livros\n"
+        "5 - Gerar relatório de itens do pedido\n"
         "0 - Voltar\n"
         "Terminal: ")
     return opcao
