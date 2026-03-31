@@ -40,7 +40,7 @@ class Pedido:
 
 
 class PedidoItem:
-    def __init__(self, id, pedido_id, livro_id, quantidade):
+    def __init__(self, pedido_id, livro_id, quantidade, id=None):
         self.id = id
         self.pedido_id = pedido_id
         self.livro_id = livro_id

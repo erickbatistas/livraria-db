@@ -58,3 +58,24 @@ INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES
 (7, 11, 1),
 -- Pedido 8 (Fernanda)
 (8, 14, 1);
+
+-- 5. FUNCIONÁRIOS (5 Exemplos)
+INSERT INTO funcionario (nome, cargo, email, ativo) VALUES
+('João Silva', 'Vendedor', 'joao.silva@livraria.com', TRUE),
+('Maria Oliveira', 'Gerente', 'maria.oliveira@livraria.com', TRUE),
+('Pedro Santos', 'Caixa', 'pedro.santos@livraria.com', TRUE),
+('Ana Souza', 'Vendedora', 'ana.souza@livraria.com', TRUE),
+('Carlos Pereira', 'Estoquista', 'carlos.pereira@livraria.com', FALSE);
+
+-- 6. FORNECEDORES (5 Exemplos)
+INSERT INTO fornecedor (nome, email, telefone, ativo) VALUES
+('Editora Atlas', 'contato@atlas.com.br', '11-1111-1111', TRUE),
+('Distribuidora Livros S.A.', 'vendas@distribuidoralivros.com', '21-2222-2222', TRUE),
+('Papelaria Central', 'compras@papelariacentral.com', '31-3333-3333', TRUE),
+('Importados & Cia', 'import@cia.com', '41-4444-4444', TRUE),
+('Editora Moderna', 'contato@moderna.com.br', '51-5555-5555', FALSE);
+
+-- Atualizando pedidos para associar a funcionários
+UPDATE pedido SET funcionario_id = 1 WHERE id IN (1, 6, 8);
+UPDATE pedido SET funcionario_id = 4 WHERE id IN (2, 4, 5);
+UPDATE pedido SET funcionario_id = 3 WHERE id IN (3, 7);

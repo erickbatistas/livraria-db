@@ -503,206 +503,239 @@ def main():
 
                 if tarefa != "0":
                     pausar()
+        
+        elif opcao == "6":
+            iniciar_area_cliente()
+
+        elif opcao == "0":
+            print("Saindo...")
+            break
+
+def menu():
+    # os.system("cls" if os.name == "nt" else "clear")
+    print("====================================")
+    print("      LIVRARIA DB - MENU")
+    print("====================================")
+    print("1 - Clientes")
+    print("2 - Livros")
+    print("3 - Pedidos")
+    print("4 - Funcionários")
+    print("5 - Fornecedores")
+    print("6 - Área do Cliente")
+    print("0 - Sair")
+    return input("Terminal: ")
+
+def menuAreaCliente():
+    print("\n-- ÁREA DO CLIENTE --")
+    print("1 - Ver meus dados cadastrais")
+    print("2 - Alterar meus dados cadastrais")
+    print("3 - Ver meus pedidos")
+    print("0 - Voltar ao menu principal")
+    return input("Terminal: ")
+
+def iniciar_area_cliente():
+    cliente_dao = ClienteDAO()
+    pedido_dao = PedidoDAO()
+
+    cliente_id = ler_int("\nPara começar, digite o seu ID de cliente: ")
+    cliente = cliente_dao.buscar_id(cliente_id)
+
+    if cliente is None:
+        print("\nID de cliente não encontrado.")
+        pausar()
+        return
+
+    print(f"\nBem-vindo(a), {cliente[1]}!")
+    pausar()
+
+    while True:
+        tarefa = menuAreaCliente()
+
+        if tarefa == "1":
+            print("\n-- Meus Dados Cadastrais --")
+            # Re-busca os dados para garantir que estão atualizados
+            cliente = cliente_dao.buscar_id(cliente_id) 
+            cabecalhos = ["ID", "Nome", "Email"]
+            print(tabulate([cliente], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25]))
+
+        elif tarefa == "2":
+            print("\n-- Alterar Meus Dados --")
+            print("Deixe em branco para não alterar.")
+            
+            novo_nome = ler_str_default(f"Nome ({cliente[1]}): ")
+            novo_email = ler_str_default(f"Email ({cliente[2]}): ")
+
+            # Se o campo foi deixado em branco, mantém o valor antigo
+            if not novo_nome:
+                novo_nome = cliente[1]
+            if not novo_email:
+                novo_email = cliente[2]
+
+            cliente_atualizado = m.Cliente(
+                id=cliente_id,
+                nome=novo_nome,
+                email=novo_email,
+                ativo=True # Mantém o cliente ativo
+            )
+            cliente_dao.alterar(cliente_atualizado)
+            
+            # Atualiza a variável local 'cliente' para refletir a mudança
+            cliente = cliente_dao.buscar_id(cliente_id) 
+            print("\nDados atualizados com sucesso!")
+
+        elif tarefa == "3":
+            print("\n-- Meus Pedidos --")
+            pedidos = pedido_dao.listar_cliente(cliente_id)
+            if not pedidos:
+                print("Você ainda não tem nenhum pedido.")
+            else:
+                cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
+                print(tabulate(pedidos, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+
+        elif tarefa == "0":
+            break
+        
+        if tarefa != "0":
+            pausar()
+
+def menuRelatorios():
+    print("\n-- RELATÓRIOS --")
+    print("1 - Relatório de Clientes")
+    print("2 - Relatório de Livros")
+    print("3 - Relatório de Vendas por Vendedor")
+    print("4 - Relatório Geral de Pedidos")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuClientes():
+    print("\n-- CLIENTES --")
+    print("1 - Cadastrar")
+    print("2 - Alterar")
+    print("3 - Remover")
+    print("4 - Listar todos clientes")
+    print("5 - Buscar por ID")
+    print("6 - Buscar por nome")
+    print("7 - Relatório de Clientes")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuLivros():
+    print("\n-- LIVROS --")
+    print("1 - Cadastrar")
+    print("2 - Alterar")
+    print("3 - Remover")
+    print("4 - Listar todos livros")
+    print("5 - Buscar por ID")
+    print("6 - Buscar por nome")
+    print("7 - Buscar por categoria")
+    print("8 - Buscar por faixa de preço")
+    print("9 - Buscar livros fabricados em Mari")
+    print("10 - Listar livros com pouco estoque")
+    print("11 - Gerar relatório de livros")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuPedidos():
+    print("\n-- PEDIDOS --")
+    print("1 - Fazer pedido")
+    print("2 - Alterar pedido")
+    print("3 - Listar todos pedidos")
+    print("4 - Listar por cliente")
+    print("5 - Buscar por ID")
+    print("6 - Pagar pedido")
+    print("7 - Atualizar estado do pedido")
+    print("8 - Gerar relatório de pedidos")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuFuncionarios():
+    print("\n-- FUNCIONÁRIOS --")
+    print("1 - Cadastrar")
+    print("2 - Alterar")
+    print("3 - Remover")
+    print("4 - Listar todos")
+    print("5 - Buscar por ID")
+    print("6 - Relatório de Vendas")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuFornecedores():
+    print("\n-- FORNECEDORES --")
+    print("1 - Cadastrar")
+    print("2 - Alterar")
+    print("3 - Remover")
+    print("4 - Listar todos")
+    print("5 - Buscar por ID")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def menuPedidoItem():
+    print("\n1 - Inserir item")
+    print("2 - Remover item")
+    print("3 - Listar itens do pedido")
+    print("4 - Listar livros disponíveis")
+    print("0 - Voltar")
+    return input("Terminal: ")
+
+def carrinho(pedido_id):
+    dao_item = PedidoItemDAO()
+    dao_livro = LivroDAO()
+
+    print("\n-- Carrinho de Compras --")
+    while True:
+        opcao = menuPedidoItem()
+
+        if opcao == "1":
+            print("\n-- Inserir item --")
+            livro_id = input("ID do Livro: ")
+            if dao_livro.buscar_id(livro_id) is None:
+                print("\nLivro não encontrado.")
+                continue
+
+            quantidade = ler_int("Quantidade: ")
+            if quantidade <= 0:
+                print("Quantidade inválida.")
+                continue
+
+            item = m.PedidoItem(pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
+            dao_item.inserir(item)
+            print("\nItem inserido com sucesso!")
+
+        elif opcao == "2":
+            print("\n-- Remover item --")
+            livro_id = input("ID do Livro: ")
+            if dao_livro.buscar_id(livro_id) is None:
+                print("\nLivro não encontrado.")
+                continue
+
+            item = dao_item.buscar_id(livro_id)
+            if item is None:
+                print("\nItem não encontrado.")
+                continue
+
+            dao_item.remover(item)
+            print("\nItem removido com sucesso!")
+
+        elif opcao == "3":
+            print("\n-- Itens do pedido --")
+            itens = dao_item.listar_pedido(pedido_id)
+            if not itens:
+                print("Pedido vazio.")
+            else:
+                cabecalhos = ["ID", "Livro", "Quantidade"]
+                print(tabulate(itens, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 10]))
+
+        elif opcao == "4":
+            print("\n-- Livros disponíveis --")
+            livros = dao_livro.listar_todos()
+            cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+            print(tabulate(livros, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
         elif opcao == "0":
             break
 
-        else:
-            print("\nOpção inválida.")
+        if opcao != "0":
             pausar()
-
-
-def carrinho(pedido_id):
-    # valida pedido existe
-    pedidoDao = PedidoDAO()
-    pedido_valid = pedidoDao.buscar_id(pedido_id)
-    if pedido_valid is None:
-        print("\nPedido inválido ou não encontrado. Voltando ao menu.")
-        pausar()
-        return
-
-    while True:
-        dao = PedidoItemDAO()
-        tarefa = menuPedidoItem()
-
-        if tarefa == "1":
-            print("\n-- Inserir livro no carrinho --")
-            livro_id = ler_int("ID do livro: ")
-            quantidade = ler_int("Quantidade de livros: ")
-            try:
-                novo_item = m.PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
-                sucesso = dao.inserir(novo_item)
-                if sucesso:
-                    print("\nLivro inserido no carrinho com sucesso!")
-                else:
-                    print("\nFalha ao inserir o livro no carrinho.")
-            except Exception as e:
-                print(f"\nErro ao inserir item no pedido: {e}")
-
-  
-        elif tarefa == "2":
-           
-            livro_id_str = input("Digite o ID do livro que deseja remover do carrinho: ")
-            try:
-                livro_id = int(livro_id_str)
-            except:
-                print("\nID inválido!\n")
-                continue
-
-            itens = dao.listar_pedido(pedido_id)
-            item_encontrado = None
-            for it in itens:
-                # it[2] é o livro_id retornado por listar_pedido
-                if it[2] == livro_id:
-                    item_encontrado = it
-                    break
-
-            if item_encontrado is None:
-                print("\nID do livro não encontrado no pedido!\n")
-                continue
-
-            try:
-                # mostra o item que será removido
-                print("\nRemovendo o seguinte item:")
-                cabecalhos = ["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"]
-                print(tabulate([item_encontrado], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 10, 30, 20, 10, 10]))
-                confirmar = input("Confirmar remoção? (s/N): ").strip().lower() == 's'
-                if not confirmar:
-                    print("\nOperação cancelada pelo usuário.\n")
-                else:
-                    dao.remover(pedido_id, livro_id)
-
-                    # Verifica se foi removido
-                    itens_apos = dao.listar_pedido(pedido_id)
-                    still = any(it[2] == livro_id for it in itens_apos)
-                    if not still:
-                        print("\nLivro removido do carrinho com sucesso!\n")
-                    else:
-                        print("\nFalha ao remover o item do carrinho.\n")
-            except Exception as e:
-                print(f"\nErro ao remover item do pedido: {e}\n")
-
-        elif tarefa == "3":
-            resultado = dao.listar_pedido(pedido_id)
-            cabecalhos = ["ID", "Pedido ID", "Livro ID", "Título", "Autor", "Preço", "Quantidade"]
-            print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 10, 30, 20, 10, 10] ))
-            pedidoDao = PedidoDAO()
-            pedido = pedidoDao.buscar_id(pedido_id)
-            if pedido is not None:
-                print(f"\nValor total do pedido: R$ {pedido[4]:.2f}")
-            else:
-                print("\nNão foi possível obter o valor total do pedido.")
-                
-        elif tarefa == "4":
-            dao = LivroDAO()
-            resultado = dao.listar_todos()
-            cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
-            print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8] ))
-
-        elif tarefa == "0":
-            break
-        if tarefa != "0":
-            pausar()
-
-
-def menu():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Clientes\n"
-        "2 - Livros\n"
-        "3 - Pedidos\n"
-        "4 - Funcionários\n"
-        "5 - Fornecedores\n"
-        "0 - Sair\n"
-        "Terminal: ")
-    return opcao
-
-def menuClientes():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Inserir cliente\n"
-        "2 - Alterar cliente\n"
-        "3 - Remover cliente\n"
-        "4 - Listar todos clientes\n"
-        "5 - Buscar por ID\n"
-        "6 - Buscar por nome\n"
-        "7 - Gerar relatório de clientes\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao 
-
-
-def menuLivros():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Inserir livro\n"
-        "2 - Alterar livro\n"
-        "3 - Remover livro\n"
-        "4 - Listar todos livros\n"
-        "5 - Buscar por ID\n"
-        "6 - Buscar por nome\n"
-        "7 - Buscar por categoria\n"
-        "8 - Buscar por faixa de preço\n"
-        "9 - Buscar livros fabricados em Mari\n"
-        "10 - Listar livros com pouco estoque\n"
-        "11 - Gerar relatório de livros\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao 
-
-
-def menuPedidos():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Fazer pedido\n"
-        "2 - Alterar pedido\n"
-        "3 - Listar todos pedidos\n"
-        "4 - Listar por cliente\n"
-        "5 - Buscar por ID\n"
-        "6 - Pagar pedido\n"
-        "7 - Atualizar estado do pedido\n"
-        "8 - Gerar relatório de pedidos\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao 
-
-
-def menuPedidoItem():
-    opcao = input("\nOpções:\n"
-        "1 - Inserir item\n"
-        "2 - Remover item\n"
-        "3 - Listar pedido\n"
-        "4 - Listar livros\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao
-
-
-def menuFuncionarios():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Inserir funcionário\n"
-        "2 - Alterar funcionário\n"
-        "3 - Remover funcionário\n"
-        "4 - Listar todos funcionários\n"
-        "5 - Buscar por ID\n"
-        "6 - Relatório de vendas por vendedor\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao
-
-def menuFornecedores():
-    limpar_tela()
-    opcao = input("\nOpções:\n"
-        "1 - Inserir fornecedor\n"
-        "2 - Alterar fornecedor\n"
-        "3 - Remover fornecedor\n"
-        "4 - Listar todos fornecedores\n"
-        "5 - Buscar por ID\n"
-        "0 - Voltar\n"
-        "Terminal: ")
-    return opcao
-
 
 def ler_float(mensagem):
     while True:
