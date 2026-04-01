@@ -1,13 +1,25 @@
-from app.data_access_objects.clienteDAO import ClienteDAO
-from app.data_access_objects.livroDAO import LivroDAO
-from app.data_access_objects.pedidoDAO import PedidoDAO
-from app.data_access_objects.pedidoItemDAO import PedidoItemDAO
-from app.data_access_objects.funcionarioDAO import FuncionarioDAO
-from app.data_access_objects.fornecedorDAO import FornecedorDAO
-from app.data_access_objects.relatorioDAO import RelatorioDAO
+try:
+    from app.data_access_objects.clienteDAO import ClienteDAO
+    from app.data_access_objects.livroDAO import LivroDAO
+    from app.data_access_objects.pedidoDAO import PedidoDAO
+    from app.data_access_objects.pedidoItemDAO import PedidoItemDAO
+    from app.data_access_objects.funcionarioDAO import FuncionarioDAO
+    from app.data_access_objects.fornecedorDAO import FornecedorDAO
+    from app.data_access_objects.relatorioDAO import RelatorioDAO
+except ImportError:
+    from data_access_objects.clienteDAO import ClienteDAO
+    from data_access_objects.livroDAO import LivroDAO
+    from data_access_objects.pedidoDAO import PedidoDAO
+    from data_access_objects.pedidoItemDAO import PedidoItemDAO
+    from data_access_objects.funcionarioDAO import FuncionarioDAO
+    from data_access_objects.fornecedorDAO import FornecedorDAO
+    from data_access_objects.relatorioDAO import RelatorioDAO
 from tabulate import tabulate
 
-from app import modelo as m
+try:
+    from app import modelo as m
+except ImportError:
+    import modelo as m
 import os
 
 
@@ -16,6 +28,7 @@ def main():
         opcao = menu()
 
         if opcao == "1":
+            limpar_tela()
             dao = ClienteDAO()
             while True:
                 tarefa = menuClientes()
@@ -32,6 +45,7 @@ def main():
                 elif tarefa == "2":
                     id_alterar = input("Digite o ID do cliente que deseja alterar: ")
                     if dao.buscar_id(id_alterar) is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     print("\n-- Digite os novos dados")
@@ -55,6 +69,7 @@ def main():
                     resultado = dao.buscar_id(clientid)
 
                     if resultado is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     
@@ -91,12 +106,15 @@ def main():
                     print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8] ))
 
                 elif tarefa == "0":
+                    limpar_tela()
                     break
 
                 if tarefa != "0":
                     pausar()
+                    limpar_tela()
 
         elif opcao == "2":
+            limpar_tela()
             dao = LivroDAO()
             while True:
                 tarefa = menuLivros()
@@ -107,14 +125,26 @@ def main():
                     autor = ler_str("Autor: ")
                     preco = ler_float("Preço: R$ ")
                     estoque = ler_int_default("Quantidade em Estoque: ")
+                    categoria = ler_str_default("Categoria: ")
+                    fabricado_em_mari = input("Fabricado em Mari? (s/N): ").strip().lower() == 's'
                     
-                    novo_livro = m.Livro(id=None, titulo=titulo, autor=autor, preco=preco, estoque=estoque, ativo=True)
+                    novo_livro = m.Livro(
+                        id=None,
+                        titulo=titulo,
+                        autor=autor,
+                        preco=preco,
+                        estoque=estoque,
+                        ativo=True,
+                        categoria=categoria,
+                        fabricado_em_mari=fabricado_em_mari,
+                    )
                     dao.inserir(novo_livro)
                     print("\nLivro cadastrado com sucesso!")
 
                 elif tarefa == "2":
                     id_alterar = input("Digite o ID do livro que deseja alterar: ")
                     if dao.buscar_id(id_alterar) is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     print("\n-- Digite os novos dados")
@@ -123,6 +153,8 @@ def main():
                     novo_autor = ler_str("Novo Autor: ")
                     novo_preco = ler_float("Novo Preço: ")
                     novo_estoque = ler_int("Novo Estoque: ")
+                    nova_categoria = ler_str_default("Nova Categoria: ")
+                    novo_fabricado_em_mari = input("Fabricado em Mari? (s/N): ").strip().lower() == 's'
                     novo_ativo = input("Ativo? (s/N): ").lower() == 's'
 
                     # Cria o objeto Livro com os novos dados
@@ -132,7 +164,9 @@ def main():
                         autor=novo_autor, 
                         preco=float(novo_preco), 
                         estoque=int(novo_estoque),
-                        ativo=novo_ativo
+                        ativo=novo_ativo,
+                        categoria=nova_categoria,
+                        fabricado_em_mari=novo_fabricado_em_mari,
                     )
                     dao.alterar(livro_atualizado)
                     print("Livro atualizado com sucesso!")
@@ -142,11 +176,12 @@ def main():
                     resultado = dao.buscar_id(livroid)
 
                     if resultado is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     else:
                         print("\nLivro removido:")
-                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                         print(tabulate([resultado], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
                         dao.remover(livroid)
 
@@ -154,7 +189,7 @@ def main():
                     
                 elif tarefa == "4":
                     resultado = dao.listar_todos()
-                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                     print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
                 
                 elif tarefa == "5":
@@ -162,31 +197,31 @@ def main():
                     if resultado is None:
                         print("\nLivro não encontrado.")
                     else:
-                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                        cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                         print(tabulate([resultado], headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10] ))
                 
                 elif tarefa == "6":
                     nome = ler_str("Buscar por nome: ")
                     resultado = dao.buscar_por_nome(nome)
-                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                     print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
                 elif tarefa == "7":
                     categoria = ler_str("Buscar por categoria: ")
                     resultado = dao.buscar_por_categoria(categoria)
-                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                     print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
                 elif tarefa == "8":
                     preco_min = ler_float("Preço mínimo: ")
                     preco_max = ler_float("Preço máximo: ")
                     resultado = dao.buscar_por_preco(preco_min, preco_max)
-                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                     print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
                 elif tarefa == "9":
                     resultado = dao.buscar_fabricado_em_mari()
-                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+                    cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
                     print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
                 elif tarefa == "10":
@@ -201,12 +236,15 @@ def main():
                     print(f"Valor total em estoque: R$ {total_estoque:.2f}")
         
                 elif tarefa == "0":
+                    limpar_tela()
                     break
 
                 if tarefa != "0":
                     pausar()
+                    limpar_tela()
 
         elif opcao == "3":
+            limpar_tela()
             dao = PedidoDAO()
             while True:
                 tarefa = menuPedidos()
@@ -214,15 +252,18 @@ def main():
                 if tarefa == "1":
                     dao_cliente = ClienteDAO()
                     dao_funcionario = FuncionarioDAO()
+                    dao_item = PedidoItemDAO()
 
                     print("\n-- Fazer pedido --")
                     cliente_id = ler_int("ID do Cliente: ")
                     if dao_cliente.buscar_id(cliente_id) is None:
+                        limpar_tela()
                         print("\nID de cliente inválido!\n")
                         continue
 
                     funcionario_id = ler_int("ID do Vendedor (Funcionário): ")
                     if dao_funcionario.buscar_id(funcionario_id) is None:
+                        limpar_tela()
                         print("\nID de funcionário inválido!\n")
                         continue
                     
@@ -237,7 +278,7 @@ def main():
                         desconto = 0.1 # 10% de desconto
                         print(f"\nDesconto de {desconto*100}% aplicado!")
 
-                    forma_pagamento = input("Forma de pagamento (cartao, boleto, pix, berries): ").strip().lower()
+                    forma_pagamento = ler_forma_pagamento()
 
                     dao = PedidoDAO()
                     novo_pedido = m.Pedido(
@@ -256,10 +297,14 @@ def main():
                     pedido_id = dao.id_ultimo_pedido()
                     
                     carrinho(pedido_id)
+                    if not dao_item.listar_pedido(pedido_id):
+                        dao.remover(pedido_id)
+                        print("\nPedido cancelado: toda compra precisa ter pelo menos 1 item.")
 
                 elif tarefa == "2":
                     id_alterar = input("Digite o ID do pedido que deseja alterar: ")
                     if dao.buscar_id(id_alterar) is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
 
@@ -267,21 +312,21 @@ def main():
 
                 elif tarefa == "3":
                     resultado = dao.listar_todos()
-                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                    print(tabulate(resultado, headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5, 10, 12] ))
 
                 elif tarefa == "4":
                     resultado = dao.listar_cliente(input("ID do Cliente: "))
-                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                    print(tabulate(resultado, headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10] ))
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                    print(tabulate(resultado, headers = cabecalhos,tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 10, 10, 5, 10, 12] ))
 
                 elif tarefa == "5":
                     resultado = dao.buscar_id(input("Digite o ID do pedido que deseja buscar: "))
                     if resultado is None:
                         print("\nPedido não encontrado.")
                     else:
-                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5] ))
+                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                        print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5, 10, 12] ))
 
                 elif tarefa == "6":
                     id_pagar = input("ID do pedido que deseja pagar: ")
@@ -289,8 +334,8 @@ def main():
                     if pedido_para_pagar is None:
                         print("\nPedido não encontrado.")
                     else:
-                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                        print(tabulate([pedido_para_pagar], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+                        cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                        print(tabulate([pedido_para_pagar], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5, 10, 12]))
                         confirmar = input("Confirmar pagamento? (s/N): ").strip().lower() == 's'
                         if confirmar:
                             dao.pagar(id_pagar)
@@ -314,16 +359,18 @@ def main():
                         estado_novo = "ENTREGUE"
                     pedido = dao.buscar_id(pedido_id)
                     if pedido is None:
+                        limpar_tela()
                         print("\nID do pedido inválido!\n")
                         continue
 
                     # Só permite mudar para PRONTO/ENTREGUE se o pedido já estiver pago
                     if estado_novo in ("PRONTO", "ENTREGUE") and not pedido[5]:
+                        limpar_tela()
                         print("\nOperação não permitida: o pedido precisa ser pago antes de enviar/entregar.\n")
                         continue
 
-                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                    print(tabulate([pedido], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+                    cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                    print(tabulate([pedido], headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5, 10, 12]))
                     confirmar = input(f"Confirmar mudança para '{estado_novo}'? (s/N): ").strip().lower() == 's'
                     if confirmar:
                         dao.atualizar_estado(pedido_id, estado_novo)
@@ -338,12 +385,15 @@ def main():
                     print(f"Valor total dos pedidos: R$ {total_pedidos:.2f}")
 
                 elif tarefa == "0":
+                    limpar_tela()
                     break
 
                 if tarefa != "0":
                     pausar()
+                    limpar_tela()
 
         elif opcao == "4":
+            limpar_tela()
             dao = FuncionarioDAO()
             while True:
                 tarefa = menuFuncionarios()
@@ -361,6 +411,7 @@ def main():
                 elif tarefa == "2":
                     id_alterar = input("Digite o ID do funcionário que deseja alterar: ")
                     if dao.buscar_id(id_alterar) is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     print("\n-- Digite os novos dados")
@@ -385,6 +436,7 @@ def main():
                     resultado = dao.buscar_id(funcid)
 
                     if resultado is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     
@@ -425,13 +477,26 @@ def main():
                         resultado_formatado = [(nome, total, f"R$ {valor:.2f}" if valor else "R$ 0.00") for nome, total, valor in resultado]
                         print(tabulate(resultado_formatado, headers=cabecalhos, tablefmt="fancy_grid"))
 
+                elif tarefa == "7":
+                    print("\n-- Produtos com Pouco Estoque (< 5) --")
+                    dao_livro = LivroDAO()
+                    resultado = dao_livro.listar_pouco_estoque()
+                    if not resultado:
+                        print("Nenhum produto com estoque baixo no momento.")
+                    else:
+                        cabecalhos = ["ID", "Título", "Autor", "Estoque"]
+                        print(tabulate(resultado, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10]))
+
                 elif tarefa == "0":
+                    limpar_tela()
                     break
 
                 if tarefa != "0":
                     pausar()
+                    limpar_tela()
 
         elif opcao == "5":
+            limpar_tela()
             dao = FornecedorDAO()
             while True:
                 tarefa = menuFornecedores()
@@ -449,6 +514,7 @@ def main():
                 elif tarefa == "2":
                     id_alterar = input("Digite o ID do fornecedor que deseja alterar: ")
                     if dao.buscar_id(id_alterar) is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     print("\n-- Digite os novos dados")
@@ -473,6 +539,7 @@ def main():
                     resultado = dao.buscar_id(fornecedorid)
 
                     if resultado is None:
+                        limpar_tela()
                         print("\nID inválido!\n")
                         continue
                     
@@ -499,12 +566,15 @@ def main():
                         print(tabulate([resultado], headers = cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 20, 25, 15]))
 
                 elif tarefa == "0":
+                    limpar_tela()
                     break
 
                 if tarefa != "0":
                     pausar()
+                    limpar_tela()
         
         elif opcao == "6":
+            limpar_tela()
             iniciar_area_cliente()
 
         elif opcao == "0":
@@ -512,7 +582,7 @@ def main():
             break
 
 def menu():
-    # os.system("cls" if os.name == "nt" else "clear")
+    limpar_tela()
     print("====================================")
     print("      LIVRARIA DB - MENU")
     print("====================================")
@@ -526,6 +596,7 @@ def menu():
     return input("Terminal: ")
 
 def menuAreaCliente():
+    limpar_tela()
     print("\n-- ÁREA DO CLIENTE --")
     print("1 - Ver meus dados cadastrais")
     print("2 - Alterar meus dados cadastrais")
@@ -589,14 +660,16 @@ def iniciar_area_cliente():
             if not pedidos:
                 print("Você ainda não tem nenhum pedido.")
             else:
-                cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago"]
-                print(tabulate(pedidos, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5]))
+                cabecalhos = ["ID", "Cliente ID", "Data", "Estado", "Valor", "Pago", "Forma", "Confirmação"]
+                print(tabulate(pedidos, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 10, 12, 12, 10, 5, 10, 12]))
 
         elif tarefa == "0":
+            limpar_tela()
             break
         
         if tarefa != "0":
             pausar()
+            limpar_tela()
 
 def menuRelatorios():
     print("\n-- RELATÓRIOS --")
@@ -656,6 +729,7 @@ def menuFuncionarios():
     print("4 - Listar todos")
     print("5 - Buscar por ID")
     print("6 - Relatório de Vendas")
+    print("7 - Produtos com pouco estoque")
     print("0 - Voltar")
     return input("Terminal: ")
 
@@ -689,32 +763,41 @@ def carrinho(pedido_id):
             print("\n-- Inserir item --")
             livro_id = input("ID do Livro: ")
             if dao_livro.buscar_id(livro_id) is None:
+                limpar_tela()
                 print("\nLivro não encontrado.")
                 continue
 
             quantidade = ler_int("Quantidade: ")
             if quantidade <= 0:
+                limpar_tela()
                 print("Quantidade inválida.")
                 continue
 
             item = m.PedidoItem(pedido_id=pedido_id, livro_id=livro_id, quantidade=quantidade)
-            dao_item.inserir(item)
-            print("\nItem inserido com sucesso!")
+            inserido = dao_item.inserir(item)
+            if inserido:
+                print("\nItem inserido com sucesso!")
 
         elif opcao == "2":
             print("\n-- Remover item --")
-            livro_id = input("ID do Livro: ")
+            livro_id = ler_int("ID do Livro: ")
             if dao_livro.buscar_id(livro_id) is None:
+                limpar_tela()
                 print("\nLivro não encontrado.")
                 continue
 
-            item = dao_item.buscar_id(livro_id)
-            if item is None:
-                print("\nItem não encontrado.")
+            itens_atuais = dao_item.listar_pedido(pedido_id)
+            itens_do_livro = [item for item in itens_atuais if item[2] == livro_id]
+            if len(itens_atuais) == 1 and itens_do_livro:
+                limpar_tela()
+                print("\nOperação não permitida: o pedido deve ter pelo menos 1 item.")
                 continue
 
-            dao_item.remover(item)
-            print("\nItem removido com sucesso!")
+            removido = dao_item.remover(pedido_id, livro_id)
+            if removido:
+                print("\nItem removido com sucesso!")
+            else:
+                print("\nItem não encontrado neste pedido.")
 
         elif opcao == "3":
             print("\n-- Itens do pedido --")
@@ -722,8 +805,8 @@ def carrinho(pedido_id):
             if not itens:
                 print("Pedido vazio.")
             else:
-                cabecalhos = ["ID", "Livro", "Quantidade"]
-                print(tabulate(itens, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 10]))
+                cabecalhos = ["ID", "Livro", "Autor", "Preço", "Quantidade", "Categoria", "Fabricado em Mari"]
+                print(tabulate(itens, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
         elif opcao == "4":
             print("\n-- Livros disponíveis --")
@@ -736,6 +819,7 @@ def carrinho(pedido_id):
 
         if opcao != "0":
             pausar()
+            limpar_tela()
 
 def ler_float(mensagem):
     while True:
@@ -775,6 +859,15 @@ def ler_str_default(mensagem):
     if dado == "":
         dado = None
     return dado
+
+
+def ler_forma_pagamento():
+    opcoes_validas = {"cartao", "boleto", "pix", "berries"}
+    while True:
+        forma = input("Forma de pagamento (cartao, boleto, pix, berries): ").strip().lower()
+        if forma in opcoes_validas:
+            return forma
+        print("Erro: forma de pagamento inválida.")
 
 
 def limpar_tela():

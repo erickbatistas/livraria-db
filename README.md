@@ -152,6 +152,71 @@ projeto. Ou rodá-lo por meio de um ambiente em nuvem.
 É necessário que tenha interface gráfica e deve ser uma aplicação pronta para uso. A interface
 gráfica pode ser em console, web, desktop ou app. Escolha aquela que possui maior familiaridade.
 
+## Parte 2 - Implementação em Etapas
+
+### Etapa 1 - Estrutura de Banco (Schema)
+
+Esta etapa cobre as entidades e regras de integridade da parte 2:
+
+- Entidades adicionais: `funcionario` e `fornecedor`.
+- Relacionamento da venda com vendedor (`pedido.funcionario_id`).
+- Forma de pagamento em `pedido.forma_pagamento` (`cartao`, `boleto`, `pix`, `berries`).
+- Status de confirmação do pagamento em `pedido.status_confirmacao_pagamento`.
+- Restrições de integridade referencial (FKs), `CHECK` para desconto e forma de pagamento.
+- Índices para filtros e relatórios (`cliente`, `livro`, `pedido`, `pedido_item`).
+
+Comando:
+
+```bash
+sudo docker exec -i <nome-do-container> psql -U postgres -d <nome-do-database> < app/sql/schema.sql
+```
+
+### Etapa 2 - Carga de Dados de Exemplo
+
+Dados iniciais atualizados para o schema da parte 2:
+
+- Clientes, funcionários, fornecedores e livros.
+- Pedidos com vendedor, forma de pagamento e status de confirmação.
+- Itens de pedido vinculados aos pedidos.
+
+Comando:
+
+```bash
+sudo docker exec -i <nome-do-container> psql -U postgres -d <nome-do-database> < app/sql/dados.sql
+```
+
+### Etapa 3 - Regras de Negócio no Backend
+
+Implementado no código Python:
+
+- Fluxo de venda sempre vinculado a cliente e vendedor.
+- Desconto de 10% quando cliente atende aos critérios (Flamengo, One Piece ou Sousa).
+- Bloqueio de compra quando não há estoque suficiente.
+- Validação de forma de pagamento (`cartao`, `boleto`, `pix`, `berries`).
+- Recalculo do valor do pedido considerando desconto ao inserir/remover itens.
+- Atualização de status de confirmação ao pagar pedido.
+- Cancelamento automático de pedido novo sem itens no carrinho.
+
+### Etapa 4 - Filtros e Consulta de Produtos
+
+Disponíveis no menu de livros:
+
+- Busca por nome.
+- Busca por categoria.
+- Busca por faixa de preço.
+- Busca por livros fabricados em Mari.
+
+Disponível no menu de funcionários:
+
+- Listagem de livros com pouco estoque (`< 5`).
+
+### Etapa 5 - Relatórios SQL (View + Procedure)
+
+- `vw_livros_pouco_estoque`: view para produtos abaixo de 5 unidades.
+- `sp_relatorio_vendas_vendedor(mes, ano)`: relatório mensal de vendas por vendedor.
+
+Relatório disponível no menu de funcionários.
+
 ## Como Executar a Aplicação
 
 Para iniciar a aplicação, execute o script `run.bat`. No terminal PowerShell, use o seguinte comando a partir da pasta raiz do projeto:

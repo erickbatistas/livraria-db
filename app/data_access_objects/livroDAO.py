@@ -1,12 +1,17 @@
-from app.data_access_objects.baseDAO import BaseDAO
+try:
+    from app.data_access_objects.baseDAO import BaseDAO
+except ImportError:
+    from data_access_objects.baseDAO import BaseDAO
 
 
 class LivroDAO(BaseDAO):
     def inserir(self, livro):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("INSERT INTO livro (titulo, autor, preco, estoque) VALUES (%s, %s, %s, %s)", 
-                       (livro.titulo, livro.autor, livro.preco, livro.estoque))
+        cursor.execute(
+            "INSERT INTO livro (titulo, autor, preco, estoque, categoria, fabricado_em_mari) VALUES (%s, %s, %s, %s, %s, %s)",
+            (livro.titulo, livro.autor, livro.preco, livro.estoque, livro.categoria, livro.fabricado_em_mari),
+        )
         con.commit()
         cursor.close()
         con.close()
@@ -14,8 +19,10 @@ class LivroDAO(BaseDAO):
     def alterar(self, livro):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("UPDATE livro SET titulo=%s, autor=%s, preco=%s, estoque=%s, ativo=%s WHERE id=%s", 
-                       (livro.titulo, livro.autor, livro.preco, livro.estoque, livro.ativo, livro.id))
+        cursor.execute(
+            "UPDATE livro SET titulo=%s, autor=%s, preco=%s, estoque=%s, ativo=%s, categoria=%s, fabricado_em_mari=%s WHERE id=%s",
+            (livro.titulo, livro.autor, livro.preco, livro.estoque, livro.ativo, livro.categoria, livro.fabricado_em_mari, livro.id),
+        )
         con.commit()
         cursor.close()
         con.close()
@@ -31,7 +38,7 @@ class LivroDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE ativo=True ORDER BY id")
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -40,7 +47,7 @@ class LivroDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE id=%s ORDER BY id", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE id=%s ORDER BY id", (id,)) # Hack, FIX: usar WHERE ativo=True para busca, cuidado pois quebra a lógica de remover()
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -49,7 +56,7 @@ class LivroDAO(BaseDAO):
     def buscar_por_nome(self, nome):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE titulo ILIKE %s AND ativo=True ORDER BY id", (f'%{nome}%',))
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE titulo ILIKE %s AND ativo=True ORDER BY id", (f'%{nome}%',))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -58,7 +65,7 @@ class LivroDAO(BaseDAO):
     def buscar_por_preco(self, preco_min, preco_max):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE preco BETWEEN %s AND %s AND ativo=True ORDER BY preco", (preco_min, preco_max))
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE preco BETWEEN %s AND %s AND ativo=True ORDER BY preco", (preco_min, preco_max))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -67,7 +74,7 @@ class LivroDAO(BaseDAO):
     def buscar_por_categoria(self, categoria):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE categoria ILIKE %s AND ativo=True ORDER BY id", (f'%{categoria}%',))
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE categoria ILIKE %s AND ativo=True ORDER BY id", (f'%{categoria}%',))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -76,7 +83,7 @@ class LivroDAO(BaseDAO):
     def buscar_fabricado_em_mari(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, titulo, autor, preco, estoque FROM livro WHERE fabricado_em_mari=True AND ativo=True ORDER BY id")
+        cursor.execute("SELECT id, titulo, autor, preco, estoque, categoria, fabricado_em_mari FROM livro WHERE fabricado_em_mari=True AND ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()

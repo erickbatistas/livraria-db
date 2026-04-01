@@ -1,12 +1,28 @@
-from app.data_access_objects.baseDAO import BaseDAO
+try:
+    from app.data_access_objects.baseDAO import BaseDAO
+except ImportError:
+    from data_access_objects.baseDAO import BaseDAO
+from datetime import datetime
 
 
 class PedidoDAO(BaseDAO):
     def inserir(self, pedido):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("INSERT INTO pedido (cliente_id, funcionario_id, estado, valor, pago, forma_pagamento, desconto) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
-                       (pedido.cliente_id, pedido.funcionario_id, pedido.estado, pedido.valor, pedido.pago, pedido.forma_pagamento, pedido.desconto))
+        cursor.execute(
+            "INSERT INTO pedido (cliente_id, funcionario_id, data_pedido, estado, valor, pago, forma_pagamento, desconto, status_confirmacao_pagamento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (
+                pedido.cliente_id,
+                pedido.funcionario_id,
+                datetime.now(),
+                pedido.estado,
+                pedido.valor,
+                pedido.pago,
+                pedido.forma_pagamento,
+                pedido.desconto,
+                pedido.status_confirmacao_pagamento,
+            ),
+        )
         con.commit()
         cursor.close()
         con.close()
@@ -24,7 +40,7 @@ class PedidoDAO(BaseDAO):
     def listar_todos(self):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE ativo=True ORDER BY id")
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago, forma_pagamento, status_confirmacao_pagamento FROM pedido WHERE ativo=True ORDER BY id")
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -33,7 +49,7 @@ class PedidoDAO(BaseDAO):
     def listar_cliente(self, cliente_id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE cliente_id=%s AND ativo=True ORDER BY id", (cliente_id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago, forma_pagamento, status_confirmacao_pagamento FROM pedido WHERE cliente_id=%s AND ativo=True ORDER BY id", (cliente_id,))
         resultado = cursor.fetchall()
         cursor.close()
         con.close()
@@ -42,7 +58,7 @@ class PedidoDAO(BaseDAO):
     def buscar_id(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago FROM pedido WHERE id=%s AND ativo=True ORDER BY id", (id,))
+        cursor.execute("SELECT id, cliente_id, data_pedido, estado, valor, pago, forma_pagamento, status_confirmacao_pagamento FROM pedido WHERE id=%s AND ativo=True ORDER BY id", (id,))
         resultado = cursor.fetchone()
         cursor.close()
         con.close()
@@ -51,7 +67,7 @@ class PedidoDAO(BaseDAO):
     def pagar(self, id):
         con = self.conectar()
         cursor = con.cursor()
-        cursor.execute("UPDATE pedido SET pago=True WHERE id=%s", (id,))
+        cursor.execute("UPDATE pedido SET pago=True, status_confirmacao_pagamento='CONFIRMADO' WHERE id=%s", (id,))
         con.commit()
         cursor.close()
         con.close()
