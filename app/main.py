@@ -811,7 +811,7 @@ def carrinho(pedido_id):
         elif opcao == "4":
             print("\n-- Livros disponíveis --")
             livros = dao_livro.listar_todos()
-            cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque"]
+            cabecalhos = ["ID", "Título", "Autor", "Preço", "Estoque", "Categoria", "Fabricado em Mari"]
             print(tabulate(livros, headers=cabecalhos, tablefmt="fancy_grid", maxcolwidths=[5, 30, 20, 10, 8]))
 
         elif opcao == "0":
