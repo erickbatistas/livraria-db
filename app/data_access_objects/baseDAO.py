@@ -1,4 +1,7 @@
-from app.database import conectar
+try:
+    from app.database import conectar
+except ImportError:
+    from database import conectar
 
 
 class BaseDAO:

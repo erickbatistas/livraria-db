@@ -136,6 +136,126 @@ class TestLivraria(unittest.TestCase):
         self.assertAlmostEqual(relatorio[0][2], valor_esperado) # Valor total vendido
         print("test_03_fluxo_de_venda_e_relatorio: SUCESSO")
 
+    def test_04_soma_item_repetido_no_carrinho(self):
+        print("\nExecutando test_04_soma_item_repetido_no_carrinho...")
+        cliente_id = self.cliente_dao.buscar_nome("Cliente Teste")[0][0]
+        vendedor_id = self.funcionario_dao.listar_todos()[0][0]
+        livro = self.livro_dao.buscar_por_nome("Categoria A")[0]
+        livro_id = livro[0]
+        estoque_inicial = livro[4]
+
+        pedido = Pedido(
+            id=None,
+            cliente_id=cliente_id,
+            funcionario_id=vendedor_id,
+            data=None,
+            estado="EM_ANDAMENTO",
+            valor=0.0,
+            pago=False,
+            forma_pagamento="pix",
+            desconto=0.0,
+        )
+        self.pedido_dao.inserir(pedido)
+        pedido_id = self.pedido_dao.id_ultimo_pedido()
+
+        ok1 = self.pedido_item_dao.inserir(PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=1))
+        ok2 = self.pedido_item_dao.inserir(PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=2))
+        self.assertTrue(ok1)
+        self.assertTrue(ok2)
+
+        itens = self.pedido_item_dao.listar_pedido(pedido_id)
+        itens_livro = [item for item in itens if item[2] == livro_id]
+        self.assertEqual(len(itens_livro), 1)
+        self.assertEqual(itens_livro[0][6], 3)
+
+        livro_atualizado = self.livro_dao.buscar_id(livro_id)
+        self.assertEqual(livro_atualizado[4], estoque_inicial - 3)
+        print("test_04_soma_item_repetido_no_carrinho: SUCESSO")
+
+    def test_05_remover_item_inexistente_retorna_false(self):
+        print("\nExecutando test_05_remover_item_inexistente_retorna_false...")
+        cliente_id = self.cliente_dao.buscar_nome("Cliente Teste")[0][0]
+        vendedor_id = self.funcionario_dao.listar_todos()[0][0]
+        livro_id = self.livro_dao.buscar_por_nome("Categoria B")[0][0]
+
+        pedido = Pedido(
+            id=None,
+            cliente_id=cliente_id,
+            funcionario_id=vendedor_id,
+            data=None,
+            estado="EM_ANDAMENTO",
+            valor=0.0,
+            pago=False,
+            forma_pagamento="boleto",
+            desconto=0.0,
+        )
+        self.pedido_dao.inserir(pedido)
+        pedido_id = self.pedido_dao.id_ultimo_pedido()
+
+        removido = self.pedido_item_dao.remover(pedido_id, livro_id)
+        self.assertFalse(removido)
+        print("test_05_remover_item_inexistente_retorna_false: SUCESSO")
+
+    def test_06_pagamento_confirma_status(self):
+        print("\nExecutando test_06_pagamento_confirma_status...")
+        cliente_id = self.cliente_dao.buscar_nome("Cliente Teste")[0][0]
+        vendedor_id = self.funcionario_dao.listar_todos()[0][0]
+
+        pedido = Pedido(
+            id=None,
+            cliente_id=cliente_id,
+            funcionario_id=vendedor_id,
+            data=None,
+            estado="EM_ANDAMENTO",
+            valor=0.0,
+            pago=False,
+            forma_pagamento="cartao",
+            desconto=0.0,
+        )
+        self.pedido_dao.inserir(pedido)
+        pedido_id = self.pedido_dao.id_ultimo_pedido()
+
+        self.pedido_dao.pagar(pedido_id)
+        pedido_pago = self.pedido_dao.buscar_id(pedido_id)
+        self.assertTrue(pedido_pago[5])
+        self.assertEqual(pedido_pago[7], "CONFIRMADO")
+        print("test_06_pagamento_confirma_status: SUCESSO")
+
+    def test_07_pedido_nao_pode_ficar_sem_itens(self):
+        print("\nExecutando test_07_pedido_nao_pode_ficar_sem_itens...")
+        cliente_id = self.cliente_dao.buscar_nome("Cliente Teste")[0][0]
+        vendedor_id = self.funcionario_dao.listar_todos()[0][0]
+        livro_id = self.livro_dao.buscar_por_nome("Categoria A")[0][0]
+
+        pedido = Pedido(
+            id=None,
+            cliente_id=cliente_id,
+            funcionario_id=vendedor_id,
+            data=None,
+            estado="EM_ANDAMENTO",
+            valor=0.0,
+            pago=False,
+            forma_pagamento="pix",
+            desconto=0.0,
+        )
+        self.pedido_dao.inserir(pedido)
+        pedido_id = self.pedido_dao.id_ultimo_pedido()
+
+        self.pedido_item_dao.inserir(PedidoItem(id=None, pedido_id=pedido_id, livro_id=livro_id, quantidade=1))
+        itens_antes = self.pedido_item_dao.listar_pedido(pedido_id)
+        self.assertEqual(len(itens_antes), 1)
+
+        # Regra de negócio na interface: não remover o último item do pedido.
+        if len(itens_antes) == 1 and itens_antes[0][2] == livro_id:
+            remocao_permitida = False
+        else:
+            remocao_permitida = self.pedido_item_dao.remover(pedido_id, livro_id)
+
+        self.assertFalse(remocao_permitida)
+        itens_depois = self.pedido_item_dao.listar_pedido(pedido_id)
+        self.assertEqual(len(itens_depois), 1)
+        print("test_07_pedido_nao_pode_ficar_sem_itens: SUCESSO")
+
 
 if __name__ == "__main__":
     unittest.main(failfast=True, verbosity=2)

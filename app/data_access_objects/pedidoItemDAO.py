@@ -1,4 +1,7 @@
-from app.data_access_objects.baseDAO import BaseDAO
+try:
+    from app.data_access_objects.baseDAO import BaseDAO
+except ImportError:
+    from data_access_objects.baseDAO import BaseDAO
 
 
 class PedidoItemDAO(BaseDAO):
@@ -19,12 +22,33 @@ class PedidoItemDAO(BaseDAO):
                     print("\nEstoque insuficiente.")
                     sucesso = False
                 else:
-                    cursor.execute("INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES (%s, %s, %s)", 
-                                   (pedido_item.pedido_id, pedido_item.livro_id, pedido_item.quantidade))
+                    cursor.execute(
+                        "SELECT id FROM pedido_item WHERE pedido_id=%s AND livro_id=%s FOR UPDATE",
+                        (pedido_item.pedido_id, pedido_item.livro_id),
+                    )
+                    item_existente = cursor.fetchone()
+
+                    if item_existente is None:
+                        cursor.execute("INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES (%s, %s, %s)", 
+                                       (pedido_item.pedido_id, pedido_item.livro_id, pedido_item.quantidade))
+                    else:
+                        cursor.execute(
+                            "UPDATE pedido_item SET quantidade = quantidade + %s WHERE pedido_id=%s AND livro_id=%s",
+                            (pedido_item.quantidade, pedido_item.pedido_id, pedido_item.livro_id),
+                        )
+
                     cursor.execute("UPDATE livro SET estoque=estoque-%s WHERE id=%s", 
                                    (pedido_item.quantidade, pedido_item.livro_id))
-                    cursor.execute("UPDATE pedido SET valor=valor+%s WHERE id=%s", 
-                                   (pedido_item.quantidade*valores_livro[1], pedido_item.pedido_id,))
+                    cursor.execute("""
+                        UPDATE pedido p
+                        SET valor = COALESCE((
+                            SELECT SUM(l.preco * pi.quantidade)
+                            FROM pedido_item pi
+                            JOIN livro l ON pi.livro_id = l.id
+                            WHERE pi.pedido_id = p.id
+                        ), 0) * (1 - p.desconto)
+                        WHERE p.id = %s
+                    """, (pedido_item.pedido_id,))
                     con.commit()
                     sucesso = True
         except Exception:
@@ -49,8 +73,20 @@ class PedidoItemDAO(BaseDAO):
             valores = cursor.fetchone()
             if valores is not None:
                 cursor.execute("UPDATE livro SET estoque=estoque+%s WHERE id=%s", (valores[0], livro_id))
-                cursor.execute("UPDATE pedido SET valor=valor-%s WHERE id=%s", (valores[0] * valores[1], pedido_id))
                 cursor.execute("DELETE FROM pedido_item WHERE pedido_id=%s AND livro_id=%s", (pedido_id, livro_id))
+                cursor.execute("""
+                    UPDATE pedido p
+                    SET valor = COALESCE((
+                        SELECT SUM(l.preco * pi.quantidade)
+                        FROM pedido_item pi
+                        JOIN livro l ON pi.livro_id = l.id
+                        WHERE pi.pedido_id = p.id
+                    ), 0) * (1 - p.desconto)
+                    WHERE p.id = %s
+                """, (pedido_id,))
+                removido = True
+            else:
+                removido = False
             con.commit()
         except Exception:
             if con:
@@ -60,6 +96,7 @@ class PedidoItemDAO(BaseDAO):
             if cursor:
                 cursor.close()
             con.close()
+        return removido
 
     def listar_pedido(self, pedido_id):
         con = self.conectar()

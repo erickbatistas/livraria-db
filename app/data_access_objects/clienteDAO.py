@@ -1,4 +1,7 @@
-from app.data_access_objects.baseDAO import BaseDAO
+try:
+    from app.data_access_objects.baseDAO import BaseDAO
+except ImportError:
+    from data_access_objects.baseDAO import BaseDAO
 
 
 class ClienteDAO(BaseDAO):

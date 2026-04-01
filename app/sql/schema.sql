@@ -7,6 +7,7 @@ CREATE TABLE cliente (
 
 
 CREATE TYPE estado_pedido AS ENUM ('EM_ANDAMENTO', 'PRONTO', 'ENTREGUE'); -- FIX: Alterar para "ESPERANDO_PAGAMENTO", "ENVIADO", "ENTREGUE"?
+CREATE TYPE status_pagamento AS ENUM ('PENDENTE', 'CONFIRMADO', 'RECUSADO');
 
 
 CREATE TABLE livro (
@@ -45,6 +46,7 @@ CREATE TABLE pedido (
     estado estado_pedido DEFAULT 'EM_ANDAMENTO',
     valor DECIMAL(10, 2) DEFAULT 0.00,
     pago BOOLEAN DEFAULT FALSE,
+    status_confirmacao_pagamento status_pagamento NOT NULL DEFAULT 'PENDENTE',
     ativo BOOLEAN DEFAULT TRUE,
     forma_pagamento VARCHAR(50),
     desconto REAL DEFAULT 0,
@@ -53,7 +55,11 @@ CREATE TABLE pedido (
     CONSTRAINT fk_cliente FOREIGN KEY (cliente_id) 
         REFERENCES cliente(id) ON DELETE CASCADE,  -- Caso o cliente seja deletado, seus pedidos também serão
     CONSTRAINT fk_funcionario FOREIGN KEY (funcionario_id)
-        REFERENCES funcionario(id)
+        REFERENCES funcionario(id),
+    CONSTRAINT chk_desconto_intervalo CHECK (desconto >= 0 AND desconto <= 1),
+    CONSTRAINT chk_forma_pagamento CHECK (
+        forma_pagamento IS NULL OR forma_pagamento IN ('cartao', 'boleto', 'pix', 'berries')
+    )
 );
 
 
@@ -66,13 +72,17 @@ CREATE TABLE pedido_item (
     CONSTRAINT fk_pedido FOREIGN KEY (pedido_id) 
         REFERENCES pedido(id) ON DELETE CASCADE,
     CONSTRAINT fk_livro FOREIGN KEY (livro_id) 
-        REFERENCES livro(id) 
+        REFERENCES livro(id),
+    CONSTRAINT uq_pedido_item UNIQUE (pedido_id, livro_id)
 );
 
 -- Índices para otimizar buscas
 CREATE INDEX idx_cliente_nome ON cliente(nome);
 CREATE INDEX idx_livro_titulo ON livro(titulo);
 CREATE INDEX idx_livro_categoria ON livro(categoria);
+CREATE INDEX idx_pedido_data ON pedido(data_pedido);
+CREATE INDEX idx_pedido_funcionario ON pedido(funcionario_id);
+CREATE INDEX idx_pedido_item_pedido ON pedido_item(pedido_id);
 
 -- View para livros com pouco estoque
 CREATE VIEW vw_livros_pouco_estoque AS

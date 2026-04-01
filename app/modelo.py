@@ -16,17 +16,19 @@ class EstadoPedido(str, Enum):
 
 
 class Livro:
-    def __init__(self, titulo, autor, preco, estoque, id=None, ativo=True):
+    def __init__(self, titulo, autor, preco, estoque, id=None, ativo=True, categoria=None, fabricado_em_mari=False):
         self.id = id
         self.titulo = titulo
         self.autor = autor
         self.preco = preco
         self.estoque = estoque
         self.ativo = ativo
+        self.categoria = categoria
+        self.fabricado_em_mari = fabricado_em_mari
 
 
 class Pedido:
-    def __init__(self, id, cliente_id, data, estado, valor, pago, funcionario_id=None, forma_pagamento=None, desconto=0.0):
+    def __init__(self, id, cliente_id, data, estado, valor, pago, funcionario_id=None, forma_pagamento=None, desconto=0.0, status_confirmacao_pagamento="PENDENTE"):
         self.id = id
         self.cliente_id = cliente_id
         self.data = data
@@ -36,6 +38,7 @@ class Pedido:
         self.funcionario_id = funcionario_id
         self.forma_pagamento = forma_pagamento
         self.desconto = desconto
+        self.status_confirmacao_pagamento = status_confirmacao_pagamento
         self.ativo = True
 
 

@@ -1,5 +1,7 @@
--- 1. CLIENTES (10 Exemplos)
-INSERT INTO cliente (nome, email, ativo) VALUES 
+-- Arquivo espelho de dados.sql para carga de dados de exemplo.
+
+-- 1. CLIENTES
+INSERT INTO cliente (nome, email, ativo) VALUES
 ('Erick Batista', 'erick@email.com', TRUE),
 ('Ana Silva', 'ana.silva@email.com', TRUE),
 ('Lucas Oliveira', 'lucas.dev@outlook.com', TRUE),
@@ -11,63 +13,15 @@ INSERT INTO cliente (nome, email, ativo) VALUES
 ('Roberto Junior', 'roberto.jr@hotmail.com', TRUE),
 ('Juliana Paes', 'ju.paes@gmail.com', TRUE);
 
--- 2. LIVROS (15 Exemplos de diversos gêneros)
-INSERT INTO livro (titulo, autor, preco, estoque, ativo) VALUES 
-('Dom Casmurro', 'Machado de Assis', 39.90, 15, TRUE),
-('1984', 'George Orwell', 45.00, 20, TRUE),
-('A Hora da Estrela', 'Clarice Lispector', 29.90, 10, TRUE),
-('O Pequeno Príncipe', 'Antoine de Saint-Exupéry', 25.00, 50, TRUE),
-('O Senhor dos Anéis', 'J.R.R. Tolkien', 89.90, 8, TRUE),
-('Harry Potter e a Pedra Filosofal', 'J.K. Rowling', 59.90, 25, TRUE),
-('O Alquimista', 'Paulo Coelho', 35.00, 12, TRUE),
-('Cem Anos de Solidão', 'Gabriel García Márquez', 55.00, 0, TRUE), -- Esgotado
-('Sapiens', 'Yuval Noah Harari', 65.00, 18, TRUE),
-('It: A Coisa', 'Stephen King', 79.90, 7, TRUE),
-('Clean Code', 'Robert C. Martin', 95.00, 15, TRUE),
-('O Código Da Vinci', 'Dan Brown', 42.00, 30, TRUE),
-('Ensaio sobre a Cegueira', 'José Saramago', 48.00, 10, TRUE),
-('A Arte da Guerra', 'Sun Tzu', 19.90, 100, TRUE),
-('Design Patterns', 'GoF', 120.00, 5, TRUE);
-
--- 3. PEDIDOS (Simulando fluxo de caixa e estados)
-INSERT INTO pedido (cliente_id, estado, valor, pago) VALUES 
-(1, 'ENTREGUE', 134.90, TRUE),
-(2, 'EM_ANDAMENTO', 45.00, FALSE),
-(3, 'PRONTO', 120.00, TRUE),
-(4, 'ENTREGUE', 59.90, TRUE),
-(5, 'EM_ANDAMENTO', 215.00, FALSE),
-(6, 'PRONTO', 39.90, TRUE),
-(1, 'EM_ANDAMENTO', 95.00, FALSE), -- Segundo pedido do Erick
-(8, 'ENTREGUE', 19.90, TRUE);
-
--- 4. ITENS DO PEDIDO (Relacionando múltiplos livros por pedido)
-INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES 
--- Pedido 1 (Erick)
-(1, 1, 1), (1, 5, 1), 
--- Pedido 2 (Ana)
-(2, 2, 1),
--- Pedido 3 (Lucas)
-(3, 15, 1),
--- Pedido 4 (Beatriz)
-(4, 6, 1),
--- Pedido 5 (Carlos)
-(5, 11, 2), (5, 4, 1),
--- Pedido 6 (Mariana)
-(6, 1, 1),
--- Pedido 7 (Erick de novo)
-(7, 11, 1),
--- Pedido 8 (Fernanda)
-(8, 14, 1);
-
--- 5. FUNCIONÁRIOS (5 Exemplos)
+-- 2. FUNCIONARIOS
 INSERT INTO funcionario (nome, cargo, email, ativo) VALUES
-('João Silva', 'Vendedor', 'joao.silva@livraria.com', TRUE),
+('Joao Silva', 'Vendedor', 'joao.silva@livraria.com', TRUE),
 ('Maria Oliveira', 'Gerente', 'maria.oliveira@livraria.com', TRUE),
 ('Pedro Santos', 'Caixa', 'pedro.santos@livraria.com', TRUE),
 ('Ana Souza', 'Vendedora', 'ana.souza@livraria.com', TRUE),
 ('Carlos Pereira', 'Estoquista', 'carlos.pereira@livraria.com', FALSE);
 
--- 6. FORNECEDORES (5 Exemplos)
+-- 3. FORNECEDORES
 INSERT INTO fornecedor (nome, email, telefone, ativo) VALUES
 ('Editora Atlas', 'contato@atlas.com.br', '11-1111-1111', TRUE),
 ('Distribuidora Livros S.A.', 'vendas@distribuidoralivros.com', '21-2222-2222', TRUE),
@@ -75,7 +29,44 @@ INSERT INTO fornecedor (nome, email, telefone, ativo) VALUES
 ('Importados & Cia', 'import@cia.com', '41-4444-4444', TRUE),
 ('Editora Moderna', 'contato@moderna.com.br', '51-5555-5555', FALSE);
 
--- Atualizando pedidos para associar a funcionários
-UPDATE pedido SET funcionario_id = 1 WHERE id IN (1, 6, 8);
-UPDATE pedido SET funcionario_id = 4 WHERE id IN (2, 4, 5);
-UPDATE pedido SET funcionario_id = 3 WHERE id IN (3, 7);
+-- 4. LIVROS
+INSERT INTO livro (titulo, autor, preco, estoque, ativo, categoria, fabricado_em_mari) VALUES
+('Dom Casmurro', 'Machado de Assis', 39.90, 15, TRUE, 'Classico', FALSE),
+('1984', 'George Orwell', 45.00, 20, TRUE, 'Distopia', FALSE),
+('A Hora da Estrela', 'Clarice Lispector', 29.90, 10, TRUE, 'Romance', FALSE),
+('O Pequeno Principe', 'Antoine de Saint-Exupery', 25.00, 50, TRUE, 'Infantil', FALSE),
+('O Senhor dos Aneis', 'J.R.R. Tolkien', 89.90, 8, TRUE, 'Fantasia', FALSE),
+('Harry Potter e a Pedra Filosofal', 'J.K. Rowling', 59.90, 25, TRUE, 'Fantasia', FALSE),
+('O Alquimista', 'Paulo Coelho', 35.00, 12, TRUE, 'Romance', TRUE),
+('Cem Anos de Solidao', 'Gabriel Garcia Marquez', 55.00, 0, TRUE, 'Romance', FALSE),
+('Sapiens', 'Yuval Noah Harari', 65.00, 18, TRUE, 'Historia', FALSE),
+('It: A Coisa', 'Stephen King', 79.90, 7, TRUE, 'Terror', FALSE),
+('Clean Code', 'Robert C. Martin', 95.00, 15, TRUE, 'Tecnologia', FALSE),
+('O Codigo Da Vinci', 'Dan Brown', 42.00, 30, TRUE, 'Suspense', FALSE),
+('Ensaio sobre a Cegueira', 'Jose Saramago', 48.00, 10, TRUE, 'Romance', FALSE),
+('A Arte da Guerra', 'Sun Tzu', 19.90, 100, TRUE, 'Estrategia', TRUE),
+('Design Patterns', 'GoF', 120.00, 5, TRUE, 'Tecnologia', FALSE);
+
+-- 5. PEDIDOS
+INSERT INTO pedido (cliente_id, funcionario_id, estado, valor, pago, status_confirmacao_pagamento, forma_pagamento, desconto) VALUES
+(1, 1, 'ENTREGUE', 134.90, TRUE, 'CONFIRMADO', 'pix', 0),
+(2, 4, 'EM_ANDAMENTO', 45.00, FALSE, 'PENDENTE', 'boleto', 0),
+(3, 3, 'PRONTO', 120.00, TRUE, 'CONFIRMADO', 'cartao', 0),
+(4, 4, 'ENTREGUE', 59.90, TRUE, 'CONFIRMADO', 'berries', 0.1),
+(5, 4, 'EM_ANDAMENTO', 215.00, FALSE, 'PENDENTE', 'pix', 0),
+(6, 1, 'PRONTO', 39.90, TRUE, 'CONFIRMADO', 'cartao', 0),
+(1, 3, 'EM_ANDAMENTO', 95.00, FALSE, 'PENDENTE', 'berries', 0.1),
+(8, 1, 'ENTREGUE', 19.90, TRUE, 'CONFIRMADO', 'pix', 0);
+
+-- 6. ITENS DOS PEDIDOS
+INSERT INTO pedido_item (pedido_id, livro_id, quantidade) VALUES
+(1, 1, 1),
+(1, 5, 1),
+(2, 2, 1),
+(3, 15, 1),
+(4, 6, 1),
+(5, 11, 2),
+(5, 4, 1),
+(6, 1, 1),
+(7, 11, 1),
+(8, 14, 1);
